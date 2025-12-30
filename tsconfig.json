@@ -1,5 +1,5 @@
 {
-  "include": ["src", "script", "vite.config.mts"],
+  "include": ["src", "script","test", "vite.config.mts"],
   "exclude": ["test"],
   "compilerOptions": {
     "allowJs": true,
