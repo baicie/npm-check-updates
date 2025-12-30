@@ -32,7 +32,6 @@ jobs:
 
       - name: Install deps
         run: pnpm install
-        env:
 
       - name: Publish package
         run: npm i -g npm && pnpm run ci-publish "$REF_NAME"
