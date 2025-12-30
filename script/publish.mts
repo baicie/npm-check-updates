@@ -1,3 +1,3 @@
 import { publish } from '@baicie/release'
 
-publish({ defaultPackage: '@baicie/ncu', packageManager: 'pnpm', getPkgDir: () => '.' })
+publish({ defaultPackage: 'ncu', packageManager: 'pnpm', getPkgDir: () => '.' })
