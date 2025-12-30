@@ -266,7 +266,7 @@ async function getAllPackages(options: Options): Promise<[PackageInfo[], string[
   if (options.ignoreDirs) {
     const ignoreDirs = Array.isArray(options.ignoreDirs) ? options.ignoreDirs : [options.ignoreDirs]
 
-    packageInfos = packageInfos.filter((packageInfo) => {
+    packageInfos = packageInfos.filter(packageInfo => {
       const relativePath = path.relative(cwd, packageInfo.filepath).replace(/\\/g, '/')
       const dirPath = path.dirname(relativePath).replace(/\\/g, '/')
 
