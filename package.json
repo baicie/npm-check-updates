@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "contributors": [
@@ -26,7 +26,7 @@
     "build": "rimraf build && npm run build:options && vite build",
     "build:options": "vite-node src/scripts/build-options.ts",
     "build:analyze": "rimraf build && npm run build:options && ANALYZER=true vite build",
-    "lint": "cross-env FORCE_COLOR=1 npm-run-all --parallel --aggregate-output lint:*",
+    "lint": "cross-env FORCE_COLOR=1 npm-run-all --parallel --aggregate-output lint:src lint:markdown lint:lockfile",
     "lint:lockfile": "lockfile-lint",
     "lint:markdown": "markdownlint \"**/*.md\" --ignore \"**/node_modules/**/*.md\" --ignore build --config .markdownlint.js",
     "lint:src": "eslint --cache --cache-location node_modules/.cache/.eslintcache --ignore-path .gitignore --report-unused-disable-directives .",
