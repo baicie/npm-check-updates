@@ -98,6 +98,9 @@ export interface RunOptions {
   /** Customize how packages are divided into groups when using `--format group`. Run "ncu --help --groupFunction" for details. */
   groupFunction?: GroupFunction
 
+  /** Ignore directories containing package.json files (comma-delimited). */
+  ignoreDirs?: string | readonly string[]
+
   /** Control the auto-install behavior: always, never, prompt. Run "ncu --help --install" for details.
    *
    * @default "prompt"

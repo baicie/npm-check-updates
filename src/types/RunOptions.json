@@ -316,6 +316,20 @@
       "description": "Customize how packages are divided into groups when using `--format group`. Run \"ncu --help --groupFunction\" for details.",
       "type": "object"
     },
+    "ignoreDirs": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "description": "Ignore directories containing package.json files (comma-delimited)."
+    },
     "install": {
       "default": "prompt",
       "description": "Control the auto-install behavior: always, never, prompt. Run \"ncu --help --install\" for details.",

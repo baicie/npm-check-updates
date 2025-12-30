@@ -1,6 +1,6 @@
 {
-  "include": ["src", "test", "vite.config.mts"],
-  "exclude": ["test/deep", "test/doctor"],
+  "include": ["src", "script", "vite.config.mts"],
+  "exclude": ["test"],
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,

@@ -1,6 +1,6 @@
 {
-  "name": "npm-check-updates",
-  "version": "19.2.0",
+  "name": "@baicie/ncu",
+  "version": "0.1.1",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "contributors": [
@@ -38,7 +38,9 @@
     "test:bun": "test/bun-install.sh && mocha test/bun",
     "test:unit": "mocha test test/package-managers/*",
     "test:e2e": "./test/e2e.sh",
-    "ncu": "node build/cli.js"
+    "ncu": "node build/cli.js",
+    "release": "tsx script/release.mts",
+    "ci-publish": "tsx script/publish.mts"
   },
   "bin": {
     "npm-check-updates": "build/cli.js",
@@ -58,6 +60,7 @@
     "@yarnpkg/parsers": "2.6.0"
   },
   "devDependencies": {
+    "@baicie/release": "^0.1.11",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/bun": "^1.2.23",
     "@types/chai": "^4.3.19",
@@ -132,6 +135,7 @@
     "spawn-please": "^3.0.0",
     "strip-ansi": "^7.1.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2",
     "typescript-json-schema": "^0.65.1",
     "untildify": "^4.0.0",

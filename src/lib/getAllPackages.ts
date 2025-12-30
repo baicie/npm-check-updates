@@ -2,6 +2,7 @@ import glob, { type Options as GlobOptions } from 'fast-glob'
 import fs from 'fs/promises'
 import yaml from 'js-yaml'
 import path from 'path'
+import picomatch from 'picomatch'
 import untildify from 'untildify'
 import { Index } from '../types/IndexType'
 import { Options } from '../types/Options'
@@ -259,6 +260,25 @@ async function getAllPackages(options: Options): Promise<[PackageInfo[], string[
   // Add catalog package info for version checking (only if there are catalogs)
   if (catalogPackageInfo) {
     packageInfos = [...packageInfos, catalogPackageInfo]
+  }
+
+  // Filter out ignored directories using glob patterns
+  if (options.ignoreDirs) {
+    const ignoreDirs = Array.isArray(options.ignoreDirs) ? options.ignoreDirs : [options.ignoreDirs]
+
+    packageInfos = packageInfos.filter((packageInfo) => {
+      const relativePath = path.relative(cwd, packageInfo.filepath).replace(/\\/g, '/')
+      const dirPath = path.dirname(relativePath).replace(/\\/g, '/')
+
+      // Check if any ignore pattern matches the directory path
+      return !ignoreDirs.some(ignorePattern => {
+        // Create glob matchers for the pattern
+        const isMatch = picomatch(ignorePattern)
+
+        // Test against both the full relative path and just the directory path
+        return isMatch(relativePath) || isMatch(dirPath) || isMatch(`${dirPath}/`)
+      })
+    })
   }
 
   return [packageInfos, workspaceNames]
