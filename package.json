@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
