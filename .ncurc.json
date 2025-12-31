@@ -1,4 +1,4 @@
 {
   "deep": true,
-  "ignore": ["temp"]
+  "ignore": ["test"]
 }
