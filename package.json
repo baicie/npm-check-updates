@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
@@ -49,9 +49,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/raineorshine/npm-check-updates.git"
+    "url": "git+https://github.com/baicie/npm-check-updates.git"
   },
-  "homepage": "https://github.com/raineorshine/npm-check-updates",
+  "homepage": "https://github.com/baicie/npm-check-updates",
   "bugs": {
     "url": "https://github.com/raineorshine/npm-check-updates/issues"
   },
