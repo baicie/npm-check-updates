@@ -1,5 +1,5 @@
 import memoize from 'fast-memoize'
-import findUp from 'find-up'
+import { findUp } from 'find-up'
 import fs from 'fs/promises'
 import ini from 'ini'
 import path from 'path'

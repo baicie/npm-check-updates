@@ -1,9 +1,9 @@
 {
   "license": "MIT",
   "dependencies": {
-    "emitter20": "1.0.0",
-    "ncu-test-return-version": "~1.0.0",
-    "ncu-test-v2": "~1.0.0"
+    "emitter20": "2.0.0",
+    "ncu-test-return-version": "~2.0.0",
+    "ncu-test-v2": "~2.0.0"
   },
   "scripts": {
     "test": "node test.js"

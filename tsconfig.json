@@ -1,5 +1,5 @@
 {
-  "include": ["src", "script", "vite.config.mts"],
+  "include": ["src", "scripts", "vite.config.mts"],
   "exclude": ["test"],
   "compilerOptions": {
     "allowJs": true,
@@ -9,8 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "lib": ["es2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
+    "module": "esnext",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "paths": {

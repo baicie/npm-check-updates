@@ -1,6 +1,7 @@
 import glob, { type Options as GlobOptions } from 'fast-glob'
 import fs from 'fs/promises'
 import yaml from 'js-yaml'
+import { extend } from 'lodash'
 import path from 'path'
 import picomatch from 'picomatch'
 import untildify from 'untildify'
@@ -17,8 +18,12 @@ type PnpmWorkspaces =
   | string[]
   | { packages: string[]; catalog?: Index<VersionSpec>; catalogs?: Index<Index<VersionSpec>> }
 
-const globOptions: GlobOptions = {
-  ignore: ['**/node_modules/**'],
+/**  */
+function getGlobOptions(options: Options): GlobOptions {
+  const ignoreDirs = typeof options.ignoreDirs === 'string' ? [options.ignoreDirs] : options.ignoreDirs || []
+  return {
+    ignore: ['**/node_modules/**', ...ignoreDirs],
+  }
 }
 
 /** Reads, parses, and resolves workspaces from a pnpm-workspace file at the same path as the package file. */
@@ -109,7 +114,7 @@ async function getWorkspacePackageInfos(
       // convert Windows path to *nix path for globby
       .replace(/\\/g, '/'),
   )
-
+  const globOptions = getGlobOptions(options)
   // e.g. [packages/a/package.json, ...]
   const allWorkspacePackageFilepaths: string[] = glob.sync(workspacePackageGlob, globOptions)
 
@@ -217,6 +222,7 @@ async function getAllPackages(options: Options): Promise<[PackageInfo[], string[
     // * NOT a workspace
     // * a workspace and have requested an upgrade of the workspace-root
     const globPattern = rootPackageFile.replace(/\\/g, '/')
+    const globOptions = getGlobOptions(options)
     const rootPackagePaths = glob.sync(globPattern, globOptions)
     // realistically there should only be zero or one
     const rootPackages = await Promise.all(

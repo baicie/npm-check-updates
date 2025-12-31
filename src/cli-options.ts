@@ -950,7 +950,6 @@ const cliOptions: CLIOption[] = [
     arg: 'value',
     description: `Determines the version to upgrade to: latest, newest, greatest, minor, patch, semver, \`@[tag]\`, or [function]. (default: latest)`,
     help: extendedHelpTarget,
-    // eslint-disable-next-line no-template-curly-in-string
     type: `${supportedVersionTargets.map(s => `'${s}'`).join(' | ')} | ${'`@${string}`'} | TargetFunction`,
   },
   {

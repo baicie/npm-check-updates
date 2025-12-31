@@ -33,7 +33,6 @@ function parseFilterExpression(filterExpression: FilterPattern | undefined): Fil
 /** Checks if a string is a valid URL. */
 function isValidUrl(url: string): boolean {
   try {
-    // eslint-disable-next-line no-new
     new URL(url)
     return true
   } catch {

@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src", "script", "test", "vite.config.mts"],
+  "include": ["src", "scripts", "test", "vite.config.mts", "rolldown.config.ts"],
   "exclude": []
 }

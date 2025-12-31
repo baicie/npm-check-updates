@@ -26,3 +26,6 @@ yarn.lock
 
 # Agent files
 .claude
+
+.eslintcache
+temp
