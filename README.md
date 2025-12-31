@@ -273,7 +273,7 @@ Options that take no arguments can be negated by prefixing them with `--no-`, e.
     <td>Customize how packages are divided into groups when using <code>--format group</code>.</td>
   </tr>
   <tr>
-    <td>--ignoreDirs &lt;dirs&gt;</td>
+    <td>--ignore &lt;dirs&gt;</td>
     <td>Ignore directories containing package.json files (comma-delimited).</td>
   </tr>
   <tr>

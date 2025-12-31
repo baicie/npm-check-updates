@@ -20,7 +20,7 @@ type PnpmWorkspaces =
 
 /**  */
 function getGlobOptions(options: Options): GlobOptions {
-  const ignoreDirs = typeof options.ignoreDirs === 'string' ? [options.ignoreDirs] : options.ignoreDirs || []
+  const ignoreDirs = typeof options.ignore === 'string' ? [options.ignore] : options.ignore || []
   return {
     ignore: ['**/node_modules/**', ...ignoreDirs],
   }
@@ -269,8 +269,8 @@ async function getAllPackages(options: Options): Promise<[PackageInfo[], string[
   }
 
   // Filter out ignored directories using glob patterns
-  if (options.ignoreDirs) {
-    const ignoreDirs = Array.isArray(options.ignoreDirs) ? options.ignoreDirs : [options.ignoreDirs]
+  if (options.ignore) {
+    const ignoreDirs = Array.isArray(options.ignore) ? options.ignore : [options.ignore]
 
     packageInfos = packageInfos.filter(packageInfo => {
       const relativePath = path.relative(cwd, packageInfo.filepath).replace(/\\/g, '/')

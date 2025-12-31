@@ -99,7 +99,7 @@ export interface RunOptions {
   groupFunction?: GroupFunction
 
   /** Ignore directories containing package.json files (comma-delimited). */
-  ignoreDirs?: string | readonly string[]
+  ignore?: string | readonly string[]
 
   /** Control the auto-install behavior: always, never, prompt. Run "ncu --help --install" for details.
    *

@@ -22,26 +22,26 @@
       "description": "The relevant bits of a parsed package.json file.",
       "properties": {
         "dependencies": {
-          "$ref": "#/definitions/Index<string>",
+          "$ref": "#/definitions/Index%3Cstring%3E",
           "description": "A very generic object."
         },
         "devDependencies": {
-          "$ref": "#/definitions/Index<string>",
+          "$ref": "#/definitions/Index%3Cstring%3E",
           "description": "A very generic object."
         },
         "engines": {
-          "$ref": "#/definitions/Index<string>",
+          "$ref": "#/definitions/Index%3Cstring%3E",
           "description": "A very generic object."
         },
         "imports": {
-          "$ref": "#/definitions/Index<string>",
+          "$ref": "#/definitions/Index%3Cstring%3E",
           "description": "A very generic object."
         },
         "name": {
           "type": "string"
         },
         "optionalDependencies": {
-          "$ref": "#/definitions/Index<string>",
+          "$ref": "#/definitions/Index%3Cstring%3E",
           "description": "A very generic object."
         },
         "overrides": {
@@ -51,7 +51,7 @@
           "type": "string"
         },
         "peerDependencies": {
-          "$ref": "#/definitions/Index<string>",
+          "$ref": "#/definitions/Index%3Cstring%3E",
           "description": "A very generic object."
         },
         "repository": {
@@ -65,7 +65,7 @@
           ]
         },
         "scripts": {
-          "$ref": "#/definitions/Index<string>",
+          "$ref": "#/definitions/Index%3Cstring%3E",
           "description": "A very generic object."
         },
         "version": {
@@ -316,7 +316,7 @@
       "description": "Customize how packages are divided into groups when using `--format group`. Run \"ncu --help --groupFunction\" for details.",
       "type": "object"
     },
-    "ignoreDirs": {
+    "ignore": {
       "anyOf": [
         {
           "items": {

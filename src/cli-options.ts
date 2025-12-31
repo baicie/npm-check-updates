@@ -680,7 +680,7 @@ const cliOptions: CLIOption[] = [
     type: 'boolean',
   },
   {
-    long: 'ignoreDirs',
+    long: 'ignore',
     arg: 'dirs',
     description: 'Ignore directories containing package.json files (comma-delimited).',
     type: 'string | readonly string[]',

@@ -1,4 +1,4 @@
 {
   "deep": true,
-  "ignoreDirs": ["temp"]
+  "ignore": ["temp"]
 }
