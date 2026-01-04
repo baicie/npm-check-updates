@@ -1,4 +1,8 @@
-# npm-check-updates
+# @baicie/ncu
+
+_This is a fork from [npm-check-updates](https://github.com/raineorshine/npm-check-updates)_
+
+## Original npm-check-updates
 
 [![npm version](https://img.shields.io/npm/v/npm-check-updates)](https://www.npmjs.com/package/npm-check-updates)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/raineorshine/npm-check-updates/test.yml?branch=main&label=tests&logo=github)](https://github.com/raineorshine/npm-check-updates/actions?query=workflow%3ATests+branch%3Amain)
