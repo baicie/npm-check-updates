@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
@@ -39,7 +39,7 @@
     "lint": "cross-env FORCE_COLOR=1 npm-run-all --parallel --aggregate-output lint:*",
     "lint:markdown": "markdownlint \"**/*.md\" --ignore \"**/node_modules/**/*.md\" --ignore build --config .markdownlint.cjs",
     "lint:src": "eslint --cache",
-    "prepublishOnly": "npm run dist",
+    "prepublishOnly": "npm run build",
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
     "test": "npm run test:unit && npm run test:e2e",
