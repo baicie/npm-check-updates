@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint'
 export default [
   // 忽略文件
   {
-    ignores: ['build/**', 'test'],
+    ignores: ['dist/**', 'test'],
   },
 
   // JavaScript 文件配置
