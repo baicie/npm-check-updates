@@ -26,6 +26,8 @@ const chalkMethods = {
   yellow: true,
 }
 
+export type ChalkMethodName = keyof typeof chalkMethods
+
 // A chalk instance that passes strings through as-is, without color. Used with color: null. */
 const chalkNoop = keyValueBy(chalkMethods, name => ({ [name]: (s: any) => s.toString() })) as Record<
   keyof typeof chalkMethods,

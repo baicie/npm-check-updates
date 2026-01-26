@@ -1,4 +1,5 @@
 import flow from 'lodash/flow'
+import semver from 'semver'
 import { parseRange } from 'semver-utils'
 import { Index } from '../types/IndexType'
 import { Options } from '../types/Options'
@@ -87,7 +88,31 @@ function upgradeDependencies(
         const downgrade: boolean =
           versionUtil.isPre(current) &&
           (typeof targetOption === 'string' ? targetOption : targetOption(name, parseRange(current))).startsWith('@')
-        return isUpgradeable(currentParsed || current, latestParsed || latest, { downgrade })
+        const curr = (currentParsed || current) as string
+        const lat = (latestParsed || latest) as string
+
+        // Normalize ranges / pseudo-versions to comparable semver versions before numeric comparison.
+        /**
+         *
+         */
+        const normalizeForCompare = (v: string): string | null => {
+          try {
+            if (semver.valid(v)) return v
+            const min = semver.minVersion(v)
+            return min ? min.version : null
+          } catch {
+            return null
+          }
+        }
+
+        const currForCompare = normalizeForCompare(curr)
+        const latForCompare = normalizeForCompare(lat)
+
+        // include package when it's upgradeable OR when the declared version is explicitly greater
+        // than the latest available (user-specified future version) so we can downgrade it to latest.
+        const explicitHigherVersion = currForCompare && latForCompare && semver.gt(currForCompare, latForCompare)
+
+        return isUpgradeable(curr, lat, { downgrade }) || explicitHigherVersion
       }),
     // pack embedded versions: npm aliases and git urls
     (deps: Index<UpgradeSpec>): Index<Version | null> =>

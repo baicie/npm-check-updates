@@ -9,7 +9,7 @@ import { Maybe } from '../types/Maybe'
 import { Options } from '../types/Options'
 import { UpgradeGroup } from '../types/UpgradeGroup'
 import { VersionLevel } from '../types/VersionLevel'
-import chalk from './chalk'
+import chalk, { ChalkMethodName } from './chalk'
 import { keyValueBy } from './keyValueBy'
 import { sortBy } from './sortBy'
 
@@ -262,7 +262,19 @@ export function colorizeDiff(from: string, to: string) {
   // major = red (or any change before 1.0.0)
   // minor = cyan
   // patch = green
-  const color = i === 0 || partsToColor[0] === '0' ? 'red' : i === 1 ? 'cyan' : 'green'
+  let color: ChalkMethodName = i === 0 || partsToColor[0] === '0' ? 'red' : i === 1 ? 'cyan' : 'green'
+
+  // If the target version is lower than the current version (explicit user-specified higher version),
+  // color the suggested version in yellow to indicate a downgrade.
+  try {
+    const fromNorm = semver.valid(from) ? from : (semver.minVersion(from)?.version ?? null)
+    const toNorm = semver.valid(to) ? to : (semver.minVersion(to)?.version ?? null)
+    if (fromNorm && toNorm && semver.gt(fromNorm, toNorm)) {
+      color = 'yellow'
+    }
+  } catch {
+    /* ignore and fallback to default color */
+  }
 
   // if we are colorizing only part of the word, add a dot in the middle
   const middot = i > 0 && i < partsToColor.length ? '.' : ''

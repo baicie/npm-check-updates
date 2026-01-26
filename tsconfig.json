@@ -18,7 +18,6 @@
       "prompts-ncu": ["./src/types/prompts-ncu"]
     },
     "resolveJsonModule": true,
-    "outDir": "./build",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
