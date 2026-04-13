@@ -76,7 +76,7 @@ export async function upgradePackageDefinitions(
 ): Promise<UpgradePackageDefinitionsResult> {
   const latestVersionResults = await queryVersions(currentDependencies, options)
 
-  const latestVersions = keyValueBy(latestVersionResults, (dep, result) =>
+  let latestVersions = keyValueBy(latestVersionResults, (dep, result) =>
     result?.version &&
     (!options.filterResults ||
       options.filterResults(dep, {
@@ -90,6 +90,15 @@ export async function upgradePackageDefinitions(
         }
       : null,
   )
+
+  // Apply pinVersions configuration - override latestVersions with pinned versions
+  if (options.pinVersions) {
+    for (const [packageName, pinnedVersion] of Object.entries(options.pinVersions)) {
+      if (packageName in latestVersions) {
+        latestVersions[packageName] = pinnedVersion as string
+      }
+    }
+  }
 
   const upgradedDependencies = upgradeDependencies(currentDependencies, latestVersions, options)
 

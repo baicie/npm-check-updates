@@ -29,6 +29,8 @@ import { VersionResult } from '../types/VersionResult'
 import { VersionSpec } from '../types/VersionSpec'
 import { filterPredicate, satisfiesCooldownPeriod, satisfiesNodeEngine } from './filters'
 
+const camelCaseFn = typeof camelCase === 'function' ? camelCase : (camelCase as any).default
+
 const EXPLICIT_RANGE_OPS = new Set(['-', '||', '&&', '<', '<=', '>', '>='])
 
 /** Returns true if the spec is an explicit version range (not ~ or ^). */
@@ -274,7 +276,7 @@ export const normalizeNpmConfig = (
         typeof pacoteKey === 'function'
         ? { ...(pacoteKey(normalizedValue.toString()) as any) }
         : // otherwise assign the camel-cased key
-          { [key.match(/^[a-z]/i) ? camelCase(key) : key]: normalizedValue }
+          { [key.match(/^[a-z]/i) ? camelCaseFn(key) : key]: normalizedValue }
   })
 
   return config
@@ -329,6 +331,7 @@ export function parseJson<R>(result: string, data: { command?: string; packageNa
       `Expected JSON from "${data.command}".${
         data.packageName ? ` There could be problems with the ${data.packageName} package.` : ''
       } ${result ? 'Instead received: ' + result : 'Received empty response.'}`,
+      { cause: err },
     )
   }
   return json as R

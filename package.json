@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.1.31",
+  "version": "0.1.33",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
@@ -128,7 +128,7 @@
     "@types/jsonlines": "^0.1.5",
     "@types/lodash": "^4.17.24",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.6.0",
+    "@types/node": "^24.12.2",
     "@types/npm-registry-fetch": "^8.0.9",
     "@types/parse-github-url": "^1.0.3",
     "@types/picomatch": "^4.0.3",

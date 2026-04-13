@@ -329,6 +329,10 @@ Options that take no arguments can be negated by prefixing them with `--no-`, e.
     <td>Check peer dependencies of installed packages and filter updates to compatible versions.</td>
   </tr>
   <tr>
+    <td>--pinVersions &lt;json&gt;</td>
+    <td>Pin packages to specific versions, bypassing target strategy. Accepts a JSON object mapping package names to versions (e.g., '{"lodash":"4.17.21"}').</td>
+  </tr>
+  <tr>
     <td>--pre &lt;n&gt;</td>
     <td>Include prerelease versions, e.g. -alpha.0, -beta.5, -rc.2. Automatically set to 1 when <code>--target</code> is newest or greatest, or when the current version is a prerelease. (default: 0)</td>
   </tr>

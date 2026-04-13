@@ -1,5 +1,8 @@
 {
   "upgrade": true,
   "deep": true,
-  "ignore": ["test"]
+  "ignore": ["test"],
+  "pinVersions": {
+    "@types/node": "24.12.2"
+  }
 }

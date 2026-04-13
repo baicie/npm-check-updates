@@ -867,6 +867,23 @@ const cliOptions: CLIOption[] = [
     help: extendedHelpPeer,
   },
   {
+    long: 'pinVersions',
+    arg: 'json',
+    description:
+      'Pin packages to specific versions, bypassing target strategy. Accepts a JSON object mapping package names to versions (e.g., \'{"lodash":"4.17.21"}\').',
+    parse: value => {
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value)
+        } catch {
+          throw new Error('pinVersions must be a valid JSON object')
+        }
+      }
+      return value
+    },
+    type: 'Index<string>',
+  },
+  {
     long: 'pre',
     arg: 'n',
     description:

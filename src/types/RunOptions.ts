@@ -3,6 +3,7 @@ import { CooldownFunction } from './CooldownFunction'
 import { FilterFunction } from './FilterFunction'
 import { FilterResultsFunction } from './FilterResultsFunction'
 import { GroupFunction } from './GroupFunction'
+import { Index } from './IndexType'
 import { PackageFile } from './PackageFile'
 import { TargetFunction } from './TargetFunction'
 
@@ -142,6 +143,9 @@ export interface RunOptions {
 
   /** Check peer dependencies of installed packages and filter updates to compatible versions. Run "ncu --help --peer" for details. */
   peer?: boolean
+
+  /** Pin packages to specific versions, bypassing target strategy. Accepts a JSON object mapping package names to versions (e.g., '{"lodash":"4.17.21"}'). */
+  pinVersions?: Index<string>
 
   /** Include prerelease versions, e.g. -alpha.0, -beta.5, -rc.2. Automatically set to 1 when `--target` is newest or greatest, or when the current version is a prerelease. (default: 0) */
   pre?: boolean

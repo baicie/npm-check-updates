@@ -148,6 +148,7 @@ function getVersion(dep: string): string {
  * @param args.to
  * @param args.ownersChangedDeps
  * @param args.format
+ * @param args.pinnedPackages
  */
 export async function toDependencyTable({
   from: fromDeps,
@@ -156,6 +157,7 @@ export async function toDependencyTable({
   ownersChangedDeps,
   pkgFile,
   time,
+  pinnedPackages,
 }: {
   from: Index<VersionSpec>
   to: Index<VersionSpec>
@@ -164,6 +166,7 @@ export async function toDependencyTable({
   /** See: logging/getPackageRepo pkgFile param. */
   pkgFile?: string
   time?: Index<string>
+  pinnedPackages?: Set<string>
 }) {
   const pkg = format?.includes('dep') && pkgFile ? JSON.parse(await fs.readFile(pkgFile, 'utf-8')) : null
   const table = renderDependencyTable(
@@ -195,12 +198,14 @@ export async function toDependencyTable({
           const toColorized = colorizeDiff(getVersion(from), to)
           const repoUrl = format?.includes('repo') ? (await getRepoUrl(dep, undefined, { pkgFile })) || '' : ''
           const publishTime = format?.includes('time') && time?.[dep] ? time[dep] : ''
+          // Add pinned suffix with yellow color
+          const pinnedSuffix = pinnedPackages?.has(dep) ? ' ' + chalk.yellow('(pinned)') : ''
           return [
             dep,
             ...(format?.includes('dep') ? [depType ? chalk.gray(depType) : ''] : []),
             from,
             '→',
-            toColorized,
+            toColorized + pinnedSuffix,
             ownerChanged,
             ...[repoUrl, publishTime].filter(x => x),
           ]
@@ -217,6 +222,7 @@ export async function toDependencyTable({
  * @param args.current
  * @param args.upgraded
  * @param args.ownersChangedDeps
+ * @param args.pinnedPackages
  * @param options
  */
 export async function printUpgradesTable(
@@ -226,12 +232,14 @@ export async function printUpgradesTable(
     ownersChangedDeps,
     pkgFile,
     time,
+    pinnedPackages,
   }: {
     current: Index<VersionSpec>
     upgraded: Index<VersionSpec>
     ownersChangedDeps?: Index<boolean>
     pkgFile?: string
     time?: Index<string>
+    pinnedPackages?: Set<string>
   },
   options: Options,
 ) {
@@ -250,12 +258,22 @@ export async function printUpgradesTable(
           ownersChangedDeps,
           pkgFile,
           time,
+          pinnedPackages,
         }),
       )
     }
   } else {
     if (options.format?.includes('lines')) {
-      printSimpleJoinedString(upgraded, '\n')
+      print(
+        options,
+        Object.keys(upgraded)
+          .sort()
+          .map(dep => {
+            const isPinned = pinnedPackages?.has(dep)
+            return isPinned ? `${dep}@${upgraded[dep]} ${chalk.yellow('(pinned)')}` : `${dep}@${upgraded[dep]}`
+          })
+          .join('\n'),
+      )
     } else {
       print(
         options,
@@ -266,6 +284,7 @@ export async function printUpgradesTable(
           ownersChangedDeps,
           pkgFile,
           time,
+          pinnedPackages,
         }),
       )
     }
@@ -375,6 +394,9 @@ export async function printUpgrades(
   }
   // print table
   else if (numUpgraded > 0) {
+    // Create pinnedPackages set from pinVersions option
+    const pinnedPackages = options.pinVersions ? new Set(Object.keys(options.pinVersions)) : undefined
+
     await printUpgradesTable(
       {
         current,
@@ -382,6 +404,7 @@ export async function printUpgrades(
         ownersChangedDeps,
         pkgFile,
         time,
+        pinnedPackages,
       },
       options,
     )

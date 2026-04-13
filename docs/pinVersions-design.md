@@ -120,9 +120,7 @@ export async function upgradePackageDefinitions(
   // 处理 pinVersions 配置
   // 如果某个包在 pinVersions 中定义，直接使用指定的版本替换 latestVersions
   let latestVersions = keyValueBy(latestVersionResults, (dep, result) =>
-    result?.version
-      ? { [dep]: result.version }
-      : null,
+    result?.version ? { [dep]: result.version } : null,
   )
 
   // 应用 pinVersions 配置
@@ -136,13 +134,13 @@ export async function upgradePackageDefinitions(
 
   // 后续逻辑保持不变...
   const filteredLatestVersions = keyValueBy(latestVersions, (dep, result) =>
-    (!options.filterResults ||
-      options.filterResults(dep, {
-        currentVersion: currentDependencies[dep],
-        currentVersionSemver: parseRange(currentDependencies[dep]),
-        upgradedVersion: result,
-        upgradedVersionSemver: parse(result),
-      }))
+    !options.filterResults ||
+    options.filterResults(dep, {
+      currentVersion: currentDependencies[dep],
+      currentVersionSemver: parseRange(currentDependencies[dep]),
+      upgradedVersion: result,
+      upgradedVersionSemver: parse(result),
+    })
       ? { [dep]: result }
       : null,
   )
@@ -166,13 +164,13 @@ export async function upgradePackageDefinitions(
 
 ## 3. 实现优先级
 
-| 优先级 | 任务 | 说明 |
-|--------|------|------|
-| P0 | 类型定义 | 在 `RunOptions.ts` 中添加 `pinVersions` 类型 |
-| P0 | CLI 选项 | 在 `cli-options.ts` 中添加 CLI 参数定义 |
-| P0 | 核心逻辑 | 在 `upgradePackageDefinitions.ts` 中实现版本锁定逻辑 |
-| P1 | 文档更新 | 添加使用示例和说明 |
-| P1 | 测试用例 | 编写单元测试覆盖新功能 |
+| 优先级 | 任务     | 说明                                                 |
+| ------ | -------- | ---------------------------------------------------- |
+| P0     | 类型定义 | 在 `RunOptions.ts` 中添加 `pinVersions` 类型         |
+| P0     | CLI 选项 | 在 `cli-options.ts` 中添加 CLI 参数定义              |
+| P0     | 核心逻辑 | 在 `upgradePackageDefinitions.ts` 中实现版本锁定逻辑 |
+| P1     | 文档更新 | 添加使用示例和说明                                   |
+| P1     | 测试用例 | 编写单元测试覆盖新功能                               |
 
 ---
 
@@ -204,11 +202,11 @@ const isValidVersion = (v: string) => /^(\d+\.)?(\d+\.)?(\d+)(-[a-zA-Z0-9.-]+)?$
 
 ### 4.3 与其他选项的优先级
 
-| 场景 | 结果 |
-|------|------|
-| 同时设置 `pinVersions` 和 `target` | `pinVersions` 优先级更高，覆盖 `target` 的选择 |
-| 同时设置 `pinVersions` 和 `filterResults` | 先应用 `pinVersions`，再应用 `filterResults` |
-| 包在 `reject` 列表中但也在 `pinVersions` 中 | `reject` 优先，包不参与升级 |
+| 场景                                        | 结果                                           |
+| ------------------------------------------- | ---------------------------------------------- |
+| 同时设置 `pinVersions` 和 `target`          | `pinVersions` 优先级更高，覆盖 `target` 的选择 |
+| 同时设置 `pinVersions` 和 `filterResults`   | 先应用 `pinVersions`，再应用 `filterResults`   |
+| 包在 `reject` 列表中但也在 `pinVersions` 中 | `reject` 优先，包不参与升级                    |
 
 ---
 
@@ -233,10 +231,10 @@ module.exports = {
   upgrade: true,
   pinVersions: {
     // 使用函数动态决定版本
-    'lodash': '4.17.21',
+    lodash: '4.17.21',
     // 也可以基于环境变量
-    'axios': process.env.AXIOS_VERSION || '0.27.2',
-  }
+    axios: process.env.AXIOS_VERSION || '0.27.2',
+  },
 }
 ```
 
@@ -254,9 +252,9 @@ import ncu from 'npm-check-updates'
 const result = await ncu({
   packageFile: './package.json',
   pinVersions: {
-    'lodash': '4.17.21',
-    'axios': '0.27.2',
-  }
+    lodash: '4.17.21',
+    axios: '0.27.2',
+  },
 })
 ```
 
@@ -278,10 +276,10 @@ react        18.2.0   →  18.2.0   (up-to-date)
 
 ## 7. 文件修改清单
 
-| 文件路径 | 修改类型 | 说明 |
-|----------|----------|------|
-| `src/types/RunOptions.ts` | 修改 | 添加 `pinVersions` 和 `PinVersions` 类型 |
-| `src/cli-options.ts` | 修改 | 添加 `--pinVersions` CLI 选项定义 |
-| `src/lib/upgradePackageDefinitions.ts` | 修改 | 实现版本锁定核心逻辑 |
-| `src/lib/logging.ts` | 可选修改 | 添加 `(pinned)` 输出标记 |
-| `src/types/RunOptions.json` | 自动生成 | 运行 `npm run build` 自动更新 |
+| 文件路径                               | 修改类型 | 说明                                     |
+| -------------------------------------- | -------- | ---------------------------------------- |
+| `src/types/RunOptions.ts`              | 修改     | 添加 `pinVersions` 和 `PinVersions` 类型 |
+| `src/cli-options.ts`                   | 修改     | 添加 `--pinVersions` CLI 选项定义        |
+| `src/lib/upgradePackageDefinitions.ts` | 修改     | 实现版本锁定核心逻辑                     |
+| `src/lib/logging.ts`                   | 可选修改 | 添加 `(pinned)` 输出标记                 |
+| `src/types/RunOptions.json`            | 自动生成 | 运行 `npm run build` 自动更新            |

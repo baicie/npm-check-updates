@@ -1,4 +1,3 @@
-import pMap from 'p-map'
 import ProgressBar from 'progress'
 import { parseRange } from 'semver-utils'
 import packageManagers from '../package-managers'
@@ -10,6 +9,7 @@ import { VersionResult } from '../types/VersionResult'
 import { VersionSpec } from '../types/VersionSpec'
 import getPackageManager from './getPackageManager'
 import keyValueBy from './keyValueBy'
+import pMap from './p-map-shim'
 import programError from './programError'
 import { createNpmAlias, isGitHubUrl, isPre, parseNpmAlias } from './version-util'
 
