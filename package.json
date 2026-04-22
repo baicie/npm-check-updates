@@ -50,7 +50,7 @@
     "ncu": "node dist/cjs/cli.cjs",
     "release": "tsx scripts/release.ts",
     "ci-publish": "tsx scripts/publish.ts",
-    "prepare": "simple-git-hooks"
+    "postinstall": "simple-git-hooks"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",
