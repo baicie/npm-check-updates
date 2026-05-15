@@ -623,6 +623,12 @@ const cliOptions: CLIOption[] = [
     type: 'boolean',
   },
   {
+    long: 'catalogs',
+    description:
+      'Treat pnpm-workspace catalogs as a special workspace. Scans catalogs from pnpm-workspace.yaml, shows progress, and outputs a separate catalog section in the results. Works with --workspaces or standalone.',
+    type: 'boolean',
+  },
+  {
     long: 'cacheClear',
     description: 'Clear the default cache, or the cache file specified by `--cacheFile`.',
     type: 'boolean',

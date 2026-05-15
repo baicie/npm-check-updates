@@ -197,6 +197,10 @@ Options that take no arguments can be negated by prefixing them with `--no-`, e.
     <td>Filepath for the cache file. Only works with <code>--cache</code>. (default: "~/.ncu-cache.json")</td>
   </tr>
   <tr>
+    <td>--catalogs</td>
+    <td>Treat pnpm-workspace catalogs as a special workspace. Scans catalogs from pnpm-workspace.yaml, shows progress, and outputs a separate catalog section in the results. Works with --workspaces or standalone.</td>
+  </tr>
+  <tr>
     <td>--color</td>
     <td>Force color in terminal.</td>
   </tr>

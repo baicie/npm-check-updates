@@ -27,6 +27,9 @@ export interface RunOptions {
    */
   cacheFile?: string
 
+  /** Treat pnpm-workspace catalogs as a special workspace. Scans catalogs from pnpm-workspace.yaml, shows progress, and outputs a separate catalog section in the results. Works with --workspaces or standalone. */
+  catalogs?: boolean
+
   /** Force color in terminal. */
   color?: boolean
 

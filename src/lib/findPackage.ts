@@ -22,7 +22,7 @@ async function findPackage(options: Options): Promise<{
   pkgPath: string | null
 }> {
   let pkgData
-  let pkgFile = null
+  let pkgFile
   const pkgPath = options.packageFile || 'package.json'
 
   /** Reads the contents of a package file. */
@@ -34,9 +34,7 @@ async function findPackage(options: Options): Promise<{
     } else {
       programError(
         options,
-        `${chalk.red(
-          `No ${pkgFileName}`,
-        )}\n\nPlease add a ${pkgFileName} to the current directory, specify the ${chalk.cyan(
+        `${chalk.red(`No ${pkgFileName}`)}\n\nPlease add a ${pkgFileName} to the current directory, specify the ${chalk.cyan(
           '--packageFile',
         )} or ${chalk.cyan('--packageData')} options, or pipe a ${pkgFileName} to stdin and specify ${chalk.cyan(
           '--stdin',

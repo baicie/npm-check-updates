@@ -7,6 +7,7 @@ import { Options } from '../types/Options'
 import { supportedVersionTargets } from '../types/Target'
 import { VersionResult } from '../types/VersionResult'
 import { VersionSpec } from '../types/VersionSpec'
+import { isCatalogReference } from './getCurrentDependencies'
 import getPackageManager from './getPackageManager'
 import keyValueBy from './keyValueBy'
 import pMap from './p-map-shim'
@@ -27,9 +28,22 @@ async function queryVersions(packageMap: Index<VersionSpec>, options: Options = 
   const globalPackageManager = getPackageManager(options, options.packageManager)
 
   let bar: ProgressBar | undefined
-  if (!options.json && options.loglevel !== 'silent' && options.loglevel !== 'verbose' && packageList.length > 0) {
-    bar = new ProgressBar('[:bar] :current/:total :percent', { total: packageList.length, width: 20 })
-    bar.render()
+  // Check if we're dealing with catalog dependencies
+  const isCatalogScan = options.catalogs && packageMap && Object.keys(packageMap).length > 0
+  const catalogName = isCatalogScan && packageList.length > 0 ? 'catalogs' : undefined
+
+  if (!options.json && options.loglevel !== 'silent' && options.loglevel !== 'verbose') {
+    // Only show progress bar when actually processing a catalog file,
+    // not when processing regular packages that happen to have catalogs configured.
+    if (options.isCatalogFile && packageList.length > 0) {
+      bar = new ProgressBar('Checking [:bar] :current/:total :percent', {
+        total: packageList.length,
+        width: 20,
+      })
+    } else if (packageList.length > 0) {
+      bar = new ProgressBar('[:bar] :current/:total :percent', { total: packageList.length, width: 20 })
+    }
+    bar?.render()
   }
 
   /**
@@ -40,6 +54,11 @@ async function queryVersions(packageMap: Index<VersionSpec>, options: Options = 
    * @returns
    */
   async function getPackageVersionProtected(dep: VersionSpec): Promise<VersionResult> {
+    // Skip catalog references - they are resolved by pnpm, not from the npm registry
+    if (isCatalogReference(packageMap[dep])) {
+      bar?.tick()
+      return { version: packageMap[dep] }
+    }
     const npmAlias = parseNpmAlias(packageMap[dep])
     const [name, version] = npmAlias || [dep, packageMap[dep]]
     const targetOption = options.target || 'latest'
