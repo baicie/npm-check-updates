@@ -163,6 +163,10 @@
       "description": "Filepath for the cache file. Only works with `--cache`.",
       "type": "string"
     },
+    "catalogs": {
+      "description": "Treat pnpm-workspace catalogs as a special workspace. Scans catalogs from pnpm-workspace.yaml, shows progress, and outputs a separate catalog section in the results. Works with --workspaces or standalone.",
+      "type": "boolean"
+    },
     "color": {
       "description": "Force color in terminal.",
       "type": "boolean"

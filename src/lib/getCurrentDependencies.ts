@@ -17,6 +17,9 @@ const isGreaterThanSafe = (spec1: VersionSpec, spec2: VersionSpec) =>
   // otherwise return true if spec2 is smaller than spec1
   semver.gt(semver.minVersion(spec1)!, semver.minVersion(spec2)!)
 
+/** Returns true if the version spec is a catalog reference (e.g., "catalog:*"). */
+export const isCatalogReference = (spec: VersionSpec) => spec === 'catalog:*' || spec.startsWith('catalog:')
+
 /** Parses the packageManager field into a { [name]: version } pair. */
 const parsePackageManager = (pkgData: PackageFile) => {
   if (!pkgData.packageManager) return {}

@@ -10,6 +10,7 @@ import { Version } from '../types/Version'
 import { VersionSpec } from '../types/VersionSpec'
 import chalk from './chalk'
 import getCurrentDependencies from './getCurrentDependencies'
+import { isCatalogReference } from './getCurrentDependencies'
 import { getIgnoredUpgradesDueToEnginesNode } from './getIgnoredUpgradesDueToEnginesNode'
 import getIgnoredUpgradesDueToPeerDeps from './getIgnoredUpgradesDueToPeerDeps'
 import getPackageManager from './getPackageManager'
@@ -192,7 +193,18 @@ export default async function runLocal(
     )
   }
 
-  const current = getCurrentDependencies(pkg, options)
+  // For the catalogs package itself, use packageInfo.pkg.dependencies directly (contains catalog:* deps).
+  // For regular packages, filter out catalog:* deps as they should not be queried from the registry.
+  const isCatalogPackage = options.isCatalogFile
+  const allDeps: Index<VersionSpec> =
+    isCatalogPackage && (pkg as PackageFile).dependencies
+      ? (pkg as PackageFile).dependencies!
+      : getCurrentDependencies(pkg, options)
+  // For regular packages, filter out catalog:* references (they are resolved by pnpm, not from the registry).
+  // For catalogs packages, keep all deps (including catalog:* refs which are the actual catalog definitions).
+  const current: Index<VersionSpec> = isCatalogPackage
+    ? allDeps
+    : Object.fromEntries(Object.entries(allDeps).filter(([, spec]) => !isCatalogReference(spec)))
 
   print(options, '\nCurrent versions:', 'verbose')
   print(options, current, 'verbose')

@@ -191,10 +191,12 @@ const install = async (
         )
         print(options, stdout)
         print(options, 'Done')
-      } catch (err: any) {
+      } catch (err: unknown) {
         // sometimes packages print errors to stdout instead of stderr
         // if there is nothing on stderr, reject with stdout
-        throw new Error(err?.message || err || stdout)
+        const message = err instanceof Error ? err.message : String(err || stdout)
+
+        throw new Error(message, { cause: err })
       }
     }
   }
@@ -235,6 +237,10 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
           ...rcConfig,
           packageFile: packageInfo.filepath,
           workspacePackages,
+          // Pass catalogs mode and pnpm-workspace path for progress bar
+          ...(packageInfo.name === 'catalogs'
+            ? { isCatalogFile: true, catalogs: true, pnpmWorkspacePath: packageInfo.pnpmWorkspacePath }
+            : null),
         }
         // For virtual catalog files (like package.json#catalog), use the PackageInfo data directly
         // since the virtual file doesn't exist on disk
@@ -252,8 +258,16 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
             : packageInfo.filepath
 
           // Print the same message as findPackage for consistency
-          const relPathToPackage = path.resolve(indexKey)
-          print(pkgOptions, `${pkgOptions.upgrade ? 'Upgrading' : 'Checking'} ${relPathToPackage} catalog dependencies`)
+          const isCatalogs = packageInfo.name === 'catalogs'
+
+          print(
+            pkgOptions,
+            `${pkgOptions.upgrade ? 'Upgrading' : 'Checking'} ${
+              isCatalogs && pkgOptions.catalogs
+                ? `catalog dependencies (${path.basename(packageInfo.filepath)})`
+                : path.resolve(indexKey)
+            }`,
+          )
         } else {
           // Regular file - read from disk
           const result = await findPackage(pkgOptions)

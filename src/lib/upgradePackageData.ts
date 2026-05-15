@@ -55,57 +55,39 @@ async function upgradePackageData(
       fileName === 'pnpm-workspace.yaml' ||
       (fileName.includes('catalog') && (fileExtension === '.yaml' || fileExtension === '.yml'))
     ) {
-      // Check if we have synthetic catalog data (JSON with only dependencies and name/version)
-      // In this case, we should generate the proper catalog structure
-      const parsed = JSON.parse(pkgData)
-      if (
-        typeof parsed === 'object' &&
-        parsed.name === 'catalog-dependencies' &&
-        typeof parsed.dependencies === 'object' &&
-        Object.keys(parsed).length <= 3
-      ) {
-        // This is synthetic catalog data, we need to generate the proper catalog structure
-        // Read the original pnpm-workspace.yaml to get the catalog structure
+      // For synthetic catalog data (from getAllPackages), the current contains catalog:*
+      // references and upgraded contains actual version specs.
+      // We need to resolve the catalog:* refs in current to actual versions
+      // from the pnpm-workspace.yaml file.
+      if (pkgData.includes('"catalog-dependencies"') || pkgData.includes('"catalog:')) {
         const yamlContent = await fs.readFile(pkgFile, 'utf-8')
         const yamlData = yaml.load(yamlContent) as {
-          packages?: string[]
           catalog?: Index<string>
           catalogs?: Index<Index<string>>
         }
 
-        // Update catalog dependencies with upgraded versions
-        if (yamlData.catalogs) {
-          yamlData.catalogs = Object.entries(yamlData.catalogs as Record<string, Record<string, string>>).reduce(
-            (catalogs, [catalogName, catalog]) => ({
-              ...catalogs,
-              [catalogName]: {
-                ...catalog,
-                ...Object.entries(upgraded)
-                  .filter(([dep]) => catalog[dep])
-                  .reduce((acc, [dep, version]) => ({ ...acc, [dep]: version }), {} as Record<string, string>),
-              },
-            }),
-            {} as Record<string, Record<string, string>>,
-          )
-        }
-
-        // Also handle single catalog (if present)
+        // Build a map of all catalog refs to their actual versions
+        const catalogRefMap: Index<string> = {}
         if (yamlData.catalog) {
-          const catalog = yamlData.catalog as Record<string, string>
-          yamlData.catalog = {
-            ...catalog,
-            ...Object.entries(upgraded)
-              .filter(([dep]) => catalog[dep])
-              .reduce((acc, [dep, version]) => ({ ...acc, [dep]: version }), {} as Record<string, string>),
+          for (const [dep, spec] of Object.entries(yamlData.catalog)) {
+            catalogRefMap[`catalog:${dep}`] = spec
+          }
+        }
+        if (yamlData.catalogs) {
+          for (const catalog of Object.values(yamlData.catalogs)) {
+            for (const [dep, spec] of Object.entries(catalog)) {
+              catalogRefMap[`catalog:${dep}`] = spec
+            }
           }
         }
 
-        // For pnpm, also expose the 'default' catalog as a top-level 'catalog' property
-        if (yamlData.catalogs?.default) {
-          yamlData.catalog = yamlData.catalogs.default
+        // Resolve catalog refs in current to actual versions
+        const resolvedCurrent: Index<VersionSpec> = {}
+        for (const [dep, spec] of Object.entries(current)) {
+          resolvedCurrent[dep] = catalogRefMap[spec] ?? spec
         }
 
-        return JSON.stringify(yamlData, null, 2)
+        return upgradeCatalogData(pkgFile, resolvedCurrent, upgraded)
       }
 
       return upgradeCatalogData(pkgFile, current, upgraded)

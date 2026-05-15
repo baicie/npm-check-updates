@@ -33,14 +33,14 @@
   },
   "scripts": {
     "dev": "rolldown --watch -c",
-    "build": "rimraf dist && npm run build:options && rolldown -m -c",
+    "build": "rimraf dist && npm run build:options && rolldown -m -c && chmod +x dist/cjs/cli.cjs dist/cjs/index.cjs",
     "build:options": "vite-node src/scripts/build-options.ts",
     "build:analyze": "rimraf dist && npm run build:options && ANALYZER=true vite build",
     "lint": "cross-env FORCE_COLOR=1 npm-run-all --parallel --aggregate-output lint:*",
     "lint:markdown": "markdownlint \"**/*.md\" --ignore \"**/node_modules/**/*.md\" --ignore build --config .markdownlint.cjs",
     "lint:src": "eslint --cache",
     "type-check": "tsc --noEmit --incremental",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && chmod +x dist/cjs/*.cjs",
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
     "test": "npm run test:unit && npm run test:e2e",
@@ -83,6 +83,7 @@
     "@yarnpkg/parsers": "2.6.0"
   },
   "dependencies": {
+    "@baicie/ncu": "link:",
     "camelcase": "^9.0.0",
     "chalk": "^5.6.2",
     "cli-table3": "^0.6.5",
@@ -171,7 +172,7 @@
     "tsx": "^4.22.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3",
-    "typescript-json-schema": "^0.67.2",
+    "typescript-json-schema": "^0.66.0",
     "verdaccio": "^6.6.2",
     "vite": "^8.0.13",
     "vite-bundle-analyzer": "^1.3.8",
