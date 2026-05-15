@@ -35,10 +35,7 @@ const parsePackageManager = (pkgData: PackageFile) => {
  * @param options - Options containing filter/reject/filterVersion/rejectVersion
  * @returns Filtered dependencies
  */
-export function filterDependencies(
-  dependencies: Index<VersionSpec>,
-  options: Options,
-): Index<VersionSpec> {
+export function filterDependencies(dependencies: Index<VersionSpec>, options: Options): Index<VersionSpec> {
   const workspacePackageMap = keyValueBy(options.workspacePackages || [])
   try {
     return filterObject(
