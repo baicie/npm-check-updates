@@ -31,7 +31,7 @@ jobs:
           package-manager-cache: false
 
       - name: Install deps
-        run: pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Publish package
         run: npm i -g npm && pnpm run ci-publish "$REF_NAME"
