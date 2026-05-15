@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
@@ -51,7 +51,7 @@
     "ncu": "node dist/cjs/cli.cjs",
     "release": "tsx scripts/release.ts",
     "ci-publish": "tsx scripts/publish.ts",
-    "postinstall": "simple-git-hooks"
+    "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",
