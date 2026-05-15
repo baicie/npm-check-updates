@@ -13,6 +13,8 @@ export type Options = RunOptions & {
   nodeEngineVersion?: VersionSpec
   packageData?: string
   peerDependencies?: Index<any>
+  // Shared progress bar used for catalog dependencies to avoid duplicate bars
+  progressBar?: any
   rcConfigPath?: string
   // A list of local workspace packages by name.
   // This is used to ignore local workspace packages when fetching new versions.

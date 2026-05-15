@@ -1,4 +1,5 @@
 import path from 'path'
+import ProgressBar from 'progress'
 import prompts from 'prompts-ncu'
 import spawn from 'spawn-please'
 import pkg from '../package.json'
@@ -220,6 +221,31 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
     clearTimeout(timeout)
     return analysis
   } else if (options.deep) {
+    // Create a shared progress bar for deep mode so catalogs show progress too
+    let sharedProgressBar: ProgressBar | undefined
+    if (
+      !options.json &&
+      options.loglevel !== 'silent' &&
+      options.loglevel !== 'verbose' &&
+      selectedPackageInfos.length > 0
+    ) {
+      // Count total deps across all packages using the same sections as getCurrentDependencies
+      let totalDeps = 0
+      for (const pkgInfo of selectedPackageInfos) {
+        const pkg = typeof pkgInfo.pkgFile === 'string' ? JSON.parse(pkgInfo.pkgFile) : pkgInfo.pkg
+        const depSections = ['dependencies', 'devDependencies', 'optionalDependencies', 'packageManager']
+        for (const section of depSections) {
+          if (pkg?.[section]) {
+            totalDeps += Object.keys(pkg[section] as Index<string>).length
+          }
+        }
+      }
+      if (totalDeps > 0) {
+        sharedProgressBar = new ProgressBar('[:bar] :current/:total :percent', { total: totalDeps, width: 20 })
+        sharedProgressBar.render()
+      }
+    }
+
     analysis = await selectedPackageInfos.reduce(
       async (previousPromise, packageInfo: PackageInfo) => {
         const packages = await previousPromise
@@ -235,6 +261,7 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
           ...rcConfig,
           packageFile: packageInfo.filepath,
           workspacePackages,
+          progressBar: sharedProgressBar,
         }
         // For virtual catalog files (like package.json#catalog), use the PackageInfo data directly
         // since the virtual file doesn't exist on disk
@@ -256,16 +283,18 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
             ...pkgOptions,
             target: (pkgOptions.catalogTarget ?? pkgOptions.target) as typeof pkgOptions.target,
           }
-
-          // Print the same message as findPackage for consistency
-          const relPathToPackage = path.resolve(indexKey)
-          print(pkgOptions, `${pkgOptions.upgrade ? 'Upgrading' : 'Checking'} ${relPathToPackage} catalog dependencies`)
         } else {
           // Regular file - read from disk
           const result = await findPackage(pkgOptions)
           pkgData = result.pkgData
           pkgFile = result.pkgFile || packageInfo.filepath
           indexKey = pkgFile
+        }
+        const result = await runLocal(pkgOptions, pkgData, pkgFile)
+        // Terminate the shared progress bar after the package finishes to clear the bar line
+        // This prevents races with stdout output from subsequent packages
+        if (sharedProgressBar) {
+          sharedProgressBar.terminate()
         }
         return {
           ...packages,
@@ -275,11 +304,12 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
                 .relative(path.resolve(pkgOptions.cwd), indexKey)
                 // convert Windows path to *nix path for consistency
                 .replace(/\\/g, '/')
-            : indexKey]: await runLocal(pkgOptions, pkgData, pkgFile),
+            : indexKey]: result,
         }
       },
       Promise.resolve({} as Index<PackageFile> | PackageFile),
     )
+
     if (options.json) {
       printJson(options, analysis)
     }

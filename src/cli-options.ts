@@ -1011,7 +1011,6 @@ const cliOptions: CLIOption[] = [
   },
   {
     long: 'catalogs',
-    default: true,
     description:
       'Include catalog dependencies in upgrade checks when using --workspaces or --workspace. Set to false to skip catalogs entirely.',
     type: 'boolean',

@@ -1,5 +1,6 @@
 import { dequal } from 'dequal'
 import propertyOf from 'lodash/propertyOf'
+import path from 'path'
 import cliOptions from '../cli-options'
 import { print } from '../lib/logging'
 import packageManagers from '../package-managers'
@@ -85,6 +86,18 @@ async function initOptions(runOptions: RunOptions, { cli }: { cli?: boolean } = 
 
   if (!json && loglevel !== 'silent' && options.rcConfigPath && !options.doctor) {
     print(options, `Using config file ${options.rcConfigPath}`)
+  }
+
+  // Show "Including catalogs" when catalogs will actually be loaded.
+  // Catalogs are loaded when:
+  // 1. --workspaces is enabled (workspaces imply catalogs), or
+  // 2. --catalogs is explicitly set to true
+  const useWorkspaces =
+    options.workspaces === true || (options.workspace !== undefined && options.workspace.length !== 0)
+  const catalogsEnabled = useWorkspaces || options.catalogs === true
+  if (!json && loglevel !== 'silent' && catalogsEnabled) {
+    print(options, 'Including catalogs')
+    print(options, `Upgrading ${options.cwd ? path.resolve(options.cwd) : process.cwd()}/catalogs`)
   }
 
   // warn about deprecated options

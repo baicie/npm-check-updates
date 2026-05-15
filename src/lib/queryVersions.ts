@@ -26,8 +26,16 @@ async function queryVersions(packageMap: Index<VersionSpec>, options: Options = 
   const packageList = Object.keys(packageMap)
   const globalPackageManager = getPackageManager(options, options.packageManager)
 
+  // Use shared progress bar if available (for catalogs), otherwise create a local one
   let bar: ProgressBar | undefined
-  if (!options.json && options.loglevel !== 'silent' && options.loglevel !== 'verbose' && packageList.length > 0) {
+  if (options.progressBar) {
+    bar = options.progressBar
+  } else if (
+    !options.json &&
+    options.loglevel !== 'silent' &&
+    options.loglevel !== 'verbose' &&
+    packageList.length > 0
+  ) {
     bar = new ProgressBar('[:bar] :current/:total :percent', { total: packageList.length, width: 20 })
     bar.render()
   }

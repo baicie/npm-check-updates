@@ -17,8 +17,10 @@ async function getEnginesNodeFromRegistry(packageMap: Index<Version>, options: O
   if (!packageManager.getEngines) return {}
 
   const numItems = Object.keys(packageMap).length
-  let bar: ProgressBar
-  if (!options.json && options.loglevel !== 'silent' && options.loglevel !== 'verbose' && numItems > 0) {
+  let bar: ProgressBar | undefined
+  if (options.progressBar) {
+    bar = options.progressBar
+  } else if (!options.json && options.loglevel !== 'silent' && options.loglevel !== 'verbose' && numItems > 0) {
     bar = new ProgressBar('[:bar] :current/:total :percent', { total: numItems, width: 20 })
     bar.render()
   }

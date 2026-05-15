@@ -33,10 +33,7 @@ export interface RunOptions {
   /** Version target strategy specifically for catalog dependencies. If not specified, uses the global --target option. Supports: latest, newest, greatest, minor, patch, semver, @[tag], or a custom function. */
   catalogTarget?: string
 
-  /** Include catalog dependencies in upgrade checks when using --workspaces or --workspace. Set to false to skip catalogs entirely.
-   *
-   * @default true
-   */
+  /** Include catalog dependencies in upgrade checks when using --workspaces or --workspace. Set to false to skip catalogs entirely. */
   catalogs?: boolean
 
   /** Force color in terminal. */

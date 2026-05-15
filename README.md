@@ -206,7 +206,7 @@ Options that take no arguments can be negated by prefixing them with `--no-`, e.
   </tr>
   <tr>
     <td>--catalogs</td>
-    <td>Include catalog dependencies in upgrade checks when using --workspaces or --workspace. Set to false to skip catalogs entirely. (default: true)</td>
+    <td>Include catalog dependencies in upgrade checks when using --workspaces or --workspace. Set to false to skip catalogs entirely.</td>
   </tr>
   <tr>
     <td>--color</td>

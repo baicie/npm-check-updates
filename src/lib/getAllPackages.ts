@@ -162,6 +162,7 @@ async function getAllPackages(options: Options): Promise<[PackageInfo[], string[
 
   let packageInfos: PackageInfo[] = []
 
+  // 1. Load root/base package file(s)
   const getBasePackageFile: boolean = !useWorkspaces || options.root === true
   if (getBasePackageFile) {
     const globPattern = rootPackageFile.replace(/\\/g, '/')
@@ -175,32 +176,52 @@ async function getAllPackages(options: Options): Promise<[PackageInfo[], string[
     packageInfos = [...packageInfos, ...rootPackages]
   }
 
-  if (!useWorkspaces) {
-    return [packageInfos, []]
+  // 2. Load workspace packages (if workspaces mode)
+  if (useWorkspaces) {
+    const { pkgPath: workspacePkgPath } = await findPackage({
+      ...options,
+      packageFile: rootPackageFile,
+      loglevel: 'silent',
+    })
+
+    const [workspacePackageInfos, workspaceNames]: [PackageInfo[], string[]] = await getWorkspacePackageInfos(
+      options,
+      defaultPackageFilename,
+      rootPackageFile,
+      cwd,
+    )
+    packageInfos = [...packageInfos, ...workspacePackageInfos]
+
+    // Workspaces mode: catalogs are loaded alongside workspace packages
+    if (workspacePkgPath) {
+      const catalogInfos = await getCatalogPackageInfos(options, workspacePkgPath)
+      if (catalogInfos.length > 0) {
+        packageInfos = [...packageInfos, ...catalogInfos]
+      }
+    }
+
+    return [packageInfos, workspaceNames]
   }
 
-  const { pkgPath: workspacePkgPath } = await findPackage({
-    ...options,
-    packageFile: rootPackageFile,
-    loglevel: 'silent',
-  })
-
-  const [workspacePackageInfos, workspaceNames]: [PackageInfo[], string[]] = await getWorkspacePackageInfos(
-    options,
-    defaultPackageFilename,
-    rootPackageFile,
-    cwd,
-  )
-
-  packageInfos = [...packageInfos, ...workspacePackageInfos]
-
-  if (workspacePkgPath) {
-    const catalogInfos = await getCatalogPackageInfos(options, workspacePkgPath)
-    if (catalogInfos.length > 0) {
-      packageInfos = [...packageInfos, ...catalogInfos]
+  // 3. Non-workspaces mode: optionally load catalogs as an addition to base packages
+  // --catalogs is an opt-in to also scan catalogs from pnpm-workspace.yaml
+  if (options.catalogs === true) {
+    // Use fixed 'package.json' for catalog loading, not deep glob pattern
+    const catalogPackageFile = options.cwd ? path.join(untildify(options.cwd), 'package.json') : 'package.json'
+    const { pkgPath } = await findPackage({
+      ...options,
+      packageFile: catalogPackageFile,
+      loglevel: 'silent',
+    })
+    if (pkgPath) {
+      const catalogInfos = await getCatalogPackageInfos(options, pkgPath)
+      if (catalogInfos.length > 0) {
+        packageInfos = [...packageInfos, ...catalogInfos]
+      }
     }
   }
 
+  // 4. Apply ignore filter
   if (options.ignore) {
     const ignoreDirs = Array.isArray(options.ignore) ? options.ignore : [options.ignore]
 
@@ -215,7 +236,7 @@ async function getAllPackages(options: Options): Promise<[PackageInfo[], string[
     })
   }
 
-  return [packageInfos, workspaceNames]
+  return [packageInfos, []]
 }
 
 export default getAllPackages

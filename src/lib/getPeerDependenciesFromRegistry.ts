@@ -54,8 +54,10 @@ async function getPeerDependenciesFromRegistry(packageMap: Index<Version>, optio
   if (!packageManager.getPeerDependencies) return {}
 
   const numItems = Object.keys(packageMap).length
-  let bar: ProgressBar
-  if (!options.json && options.loglevel !== 'silent' && options.loglevel !== 'verbose' && numItems > 0) {
+  let bar: ProgressBar | undefined
+  if (options.progressBar) {
+    bar = options.progressBar
+  } else if (!options.json && options.loglevel !== 'silent' && options.loglevel !== 'verbose' && numItems > 0) {
     bar = new ProgressBar('[:bar] :current/:total :percent', { total: numItems, width: 20 })
     bar.render()
   }
