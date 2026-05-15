@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
@@ -50,7 +50,7 @@
     "ncu": "node dist/cjs/cli.cjs",
     "release": "tsx scripts/release.ts",
     "ci-publish": "tsx scripts/publish.ts",
-    "postinstall": "simple-git-hooks"
+    "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",
@@ -201,14 +201,5 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ],
-    "ignoredBuiltDependencies": [
-      "simple-git-hooks",
-      "yarn"
-    ]
   }
 }
