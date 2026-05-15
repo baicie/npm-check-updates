@@ -56,12 +56,15 @@ function getCurrentDependencies(pkgData: PackageFile = {}, options: Options = {}
   try {
     filteredDependencies = filterObject(
       filterObject(allDependencies, name => !workspacePackageMap[name]),
-      filterAndReject(
-        options.filter || null,
-        options.reject || null,
-        options.filterVersion || null,
-        options.rejectVersion || null,
-      ),
+      (name, spec) =>
+        // filter out pnpm catalog references (e.g. catalog:build, catalog:vue)
+        !spec.startsWith('catalog:') &&
+        filterAndReject(
+          options.filter || null,
+          options.reject || null,
+          options.filterVersion || null,
+          options.rejectVersion || null,
+        )(name, spec),
     )
   } catch (err: any) {
     programError(options, 'Invalid filter: ' + err.message || err)
