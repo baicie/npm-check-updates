@@ -4,16 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@baicie/ncu': 'link:'
-
 importers:
 
   .:
     dependencies:
-      '@baicie/ncu':
-        specifier: 'link:'
-        version: 'link:'
       camelcase:
         specifier: ^9.0.0
         version: 9.0.0

@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
@@ -83,7 +83,6 @@
     "@yarnpkg/parsers": "2.6.0"
   },
   "dependencies": {
-    "@baicie/ncu": "link:",
     "camelcase": "^9.0.0",
     "chalk": "^5.6.2",
     "cli-table3": "^0.6.5",
