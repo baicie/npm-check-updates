@@ -4,5 +4,6 @@
   "ignore": ["test"],
   "pinVersions": {
     "@types/node": "24.12.2"
-  }
+  },
+  "reject": ["typescript-json-schema"]
 }

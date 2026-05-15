@@ -141,6 +141,14 @@ function getVersion(dep: string): string {
 }
 
 /**
+ * Extract catalog name from a package file path that may contain a catalog fragment.
+ */
+function extractCatalogNameFromPath(pkgFile: string): string | undefined {
+  const match = pkgFile.match(/#catalog:([^#]+)/)
+  return match ? match[1] : undefined
+}
+
+/**
  * Renders a color-coded table of upgrades.
  *
  * @param args
@@ -158,6 +166,7 @@ export async function toDependencyTable({
   pkgFile,
   time,
   pinnedPackages,
+  catalogName,
 }: {
   from: Index<VersionSpec>
   to: Index<VersionSpec>
@@ -167,6 +176,7 @@ export async function toDependencyTable({
   pkgFile?: string
   time?: Index<string>
   pinnedPackages?: Set<string>
+  catalogName?: string
 }) {
   const pkg = format?.includes('dep') && pkgFile ? JSON.parse(await fs.readFile(pkgFile, 'utf-8')) : null
   const table = renderDependencyTable(
@@ -200,12 +210,13 @@ export async function toDependencyTable({
           const publishTime = format?.includes('time') && time?.[dep] ? time[dep] : ''
           // Add pinned suffix with yellow color
           const pinnedSuffix = pinnedPackages?.has(dep) ? ' ' + chalk.yellow('(pinned)') : ''
+          const catalogSuffix = catalogName ? ' ' + chalk.cyan(`[catalog:${catalogName}]`) : ''
           return [
             dep,
             ...(format?.includes('dep') ? [depType ? chalk.gray(depType) : ''] : []),
             from,
             '→',
-            toColorized + pinnedSuffix,
+            toColorized + pinnedSuffix + catalogSuffix,
             ownerChanged,
             ...[repoUrl, publishTime].filter(x => x),
           ]
@@ -233,6 +244,7 @@ export async function printUpgradesTable(
     pkgFile,
     time,
     pinnedPackages,
+    catalogName,
   }: {
     current: Index<VersionSpec>
     upgraded: Index<VersionSpec>
@@ -240,6 +252,7 @@ export async function printUpgradesTable(
     pkgFile?: string
     time?: Index<string>
     pinnedPackages?: Set<string>
+    catalogName?: string
   },
   options: Options,
 ) {
@@ -259,6 +272,7 @@ export async function printUpgradesTable(
           pkgFile,
           time,
           pinnedPackages,
+          catalogName,
         }),
       )
     }
@@ -285,6 +299,7 @@ export async function printUpgradesTable(
           pkgFile,
           time,
           pinnedPackages,
+          catalogName,
         }),
       )
     }
@@ -397,6 +412,9 @@ export async function printUpgrades(
     // Create pinnedPackages set from pinVersions option
     const pinnedPackages = options.pinVersions ? new Set(Object.keys(options.pinVersions)) : undefined
 
+    // Extract catalogName from pkgFile if it contains a catalog fragment
+    const catalogName = pkgFile ? extractCatalogNameFromPath(pkgFile) : undefined
+
     await printUpgradesTable(
       {
         current,
@@ -405,6 +423,7 @@ export async function printUpgrades(
         pkgFile,
         time,
         pinnedPackages,
+        catalogName,
       },
       options,
     )

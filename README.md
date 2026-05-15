@@ -197,6 +197,18 @@ Options that take no arguments can be negated by prefixing them with `--no-`, e.
     <td>Filepath for the cache file. Only works with <code>--cache</code>. (default: "~/.ncu-cache.json")</td>
   </tr>
   <tr>
+    <td>--catalog &lt;names&gt;</td>
+    <td>Specify which catalogs to check/upgrade. Accepts a comma-separated list of catalog names, or a glob pattern (e.g., "default", "test,staging", "prod*"). If not specified, all catalogs are included.</td>
+  </tr>
+  <tr>
+    <td>--catalogTarget &lt;value&gt;</td>
+    <td>Version target strategy specifically for catalog dependencies. If not specified, uses the global --target option. Supports: latest, newest, greatest, minor, patch, semver, @[tag], or a custom function.</td>
+  </tr>
+  <tr>
+    <td>--catalogs</td>
+    <td>Include catalog dependencies in upgrade checks when using --workspaces or --workspace. Set to false to skip catalogs entirely. (default: true)</td>
+  </tr>
+  <tr>
     <td>--color</td>
     <td>Force color in terminal.</td>
   </tr>

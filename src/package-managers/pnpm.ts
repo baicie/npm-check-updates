@@ -107,6 +107,20 @@ async function spawnPnpm(
   return stdout
 }
 
+/**
+ * Check if pnpm version supports catalogs (pnpm v8.6+).
+ */
+export async function supportsCatalogs(): Promise<boolean> {
+  try {
+    const { stdout } = await spawn('pnpm', ['--version'])
+    const version = stdout.trim()
+    const [major, minor] = version.split('.').map(Number)
+    return major > 8 || (major === 8 && minor >= 6)
+  } catch {
+    return false
+  }
+}
+
 export { defaultPrefix, getPeerDependencies, getEngines, packageAuthorChanged } from './npm'
 
 export default spawnPnpm

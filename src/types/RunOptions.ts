@@ -27,6 +27,18 @@ export interface RunOptions {
    */
   cacheFile?: string
 
+  /** Specify which catalogs to check/upgrade. Accepts a comma-separated list of catalog names, or a glob pattern (e.g., "default", "test,staging", "prod*"). If not specified, all catalogs are included. */
+  catalog?: string | readonly string[]
+
+  /** Version target strategy specifically for catalog dependencies. If not specified, uses the global --target option. Supports: latest, newest, greatest, minor, patch, semver, @[tag], or a custom function. */
+  catalogTarget?: string
+
+  /** Include catalog dependencies in upgrade checks when using --workspaces or --workspace. Set to false to skip catalogs entirely.
+   *
+   * @default true
+   */
+  catalogs?: boolean
+
   /** Force color in terminal. */
   color?: boolean
 

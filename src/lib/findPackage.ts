@@ -22,7 +22,7 @@ async function findPackage(options: Options): Promise<{
   pkgPath: string | null
 }> {
   let pkgData
-  let pkgFile = null
+  let pkgFile
   const pkgPath = options.packageFile || 'package.json'
 
   /** Reads the contents of a package file. */

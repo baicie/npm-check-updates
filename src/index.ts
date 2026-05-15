@@ -194,7 +194,7 @@ const install = async (
       } catch (err: any) {
         // sometimes packages print errors to stdout instead of stderr
         // if there is nothing on stderr, reject with stdout
-        throw new Error(err?.message || err || stdout)
+        throw new Error(err?.message || err || stdout, { cause: err })
       }
     }
   }
@@ -230,7 +230,7 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
           // Merge config options.
           rcConfig = mergeOptions(options, rcConfig)
         }
-        const pkgOptions: Options = {
+        let pkgOptions: Options = {
           ...options,
           ...rcConfig,
           packageFile: packageInfo.filepath,
@@ -242,14 +242,20 @@ async function runUpgrades(options: Options, timeout?: NodeJS.Timeout): Promise<
         let pkgFile: string
         let indexKey: string
 
-        if (packageInfo.filepath.includes('#') || packageInfo.name === 'catalogs') {
+        if (packageInfo.filepath.includes('#') || packageInfo.name?.startsWith('catalog:')) {
           // Virtual catalog file or catalog package - use PackageInfo data
           pkgData = packageInfo.pkgFile
           pkgFile = packageInfo.filepath
           // For synthetic catalog files, use the actual underlying file path as the index key
           indexKey = packageInfo.filepath.includes('#catalog')
-            ? packageInfo.filepath.replace('#catalog', '')
+            ? packageInfo.filepath.replace(/#catalog.*/, '')
             : packageInfo.filepath
+
+          // Apply catalogTarget for catalog packages so upgradePackageDefinitions uses it
+          pkgOptions = {
+            ...pkgOptions,
+            target: (pkgOptions.catalogTarget ?? pkgOptions.target) as typeof pkgOptions.target,
+          }
 
           // Print the same message as findPackage for consistency
           const relPathToPackage = path.resolve(indexKey)

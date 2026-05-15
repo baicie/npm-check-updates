@@ -24,9 +24,8 @@ TypeError: (0 , ce.default) is not a function
 创建 shim 文件 `src/lib/p-map-shim.ts`，在运行时处理 ESM/CJS 互操作：
 
 ```typescript
-const pMap: PMapFunction = typeof pMapModule === 'function'
-  ? pMapModule as PMapFunction
-  : (pMapModule as { default: PMapFunction }).default
+const pMap: PMapFunction =
+  typeof pMapModule === 'function' ? (pMapModule as PMapFunction) : (pMapModule as { default: PMapFunction }).default
 ```
 
 修改所有导入 `p-map` 的文件使用 shim：
@@ -62,6 +61,7 @@ TypeError: object is not a function
 
 ```typescript
 import camelCase from 'camelcase'
+
 const camelCaseFn = typeof camelCase === 'function' ? camelCase : (camelCase as any).default
 ```
 
@@ -92,29 +92,29 @@ const camelCaseFn = typeof camelCase === 'function' ? camelCase : (camelCase as 
 
 ### Node.js ESM/CJS 互操作
 
-| 包类型 | CommonJS | ESM |
-|--------|----------|-----|
-| CJS 包 | `require()` 返回模块对象 | 需要包装 |
+| 包类型 | CommonJS                 | ESM               |
+| ------ | ------------------------ | ----------------- |
+| CJS 包 | `require()` 返回模块对象 | 需要包装          |
 | ESM 包 | `require()` 返回模块对象 | `import` 直接获取 |
 
 ### rolldown 与其他打包工具的差异
 
-| 特性 | rolldown | webpack/rollup |
-|------|----------|----------------|
-| ESM 处理 | 严格遵循 ESM 规范 | 有更好的默认互操作 |
-| CJS 输出 | 可能导致 ESM 模块导入问题 | 通常更稳定 |
-| 外部依赖 | 需要手动处理 ESM-only 包 | `externals` 配置更完善 |
+| 特性     | rolldown                  | webpack/rollup         |
+| -------- | ------------------------- | ---------------------- |
+| ESM 处理 | 严格遵循 ESM 规范         | 有更好的默认互操作     |
+| CJS 输出 | 可能导致 ESM 模块导入问题 | 通常更稳定             |
+| 外部依赖 | 需要手动处理 ESM-only 包  | `externals` 配置更完善 |
 
 ---
 
 ## 修复文件清单
 
-| 文件 | 修复内容 |
-|------|----------|
-| `src/lib/p-map-shim.ts` | 新增，解决 p-map ESM 导入问题 |
-| `src/lib/queryVersions.ts` | 使用 p-map-shim |
-| `src/lib/getPeerDependenciesFromRegistry.ts` | 使用 p-map-shim |
-| `src/package-managers/npm.ts` | 修复 camelcase 导入 |
+| 文件                                         | 修复内容                      |
+| -------------------------------------------- | ----------------------------- |
+| `src/lib/p-map-shim.ts`                      | 新增，解决 p-map ESM 导入问题 |
+| `src/lib/queryVersions.ts`                   | 使用 p-map-shim               |
+| `src/lib/getPeerDependenciesFromRegistry.ts` | 使用 p-map-shim               |
+| `src/package-managers/npm.ts`                | 修复 camelcase 导入           |
 
 ---
 

@@ -26,14 +26,15 @@ react        18.2.0   →  18.2.0   (up-to-date)
 
 ### 2.1 颜色选择
 
-| 状态 | 颜色 | 说明 | 示例 |
-|------|------|------|------|
-| `pinned` | **黄色** `yellow` | 包被 pinVersions 固定到指定版本 | `┃ lodash ┃ 4.17.20 → 4.17.21 (pinned) ┃` |
-| `up-to-date` | **绿色** `green` | 包已是最新版本 | `┃ react ┃ 18.2.0 → 18.2.0 (up-to-date) ┃` |
-| `upgrade` | **红色** `red` | 包有可用升级 | `┃ axios ┃ 0.27.1 → 0.27.2 ┃` |
-| `downgrade` | **红色** `red` (闪烁) | 包需要降级（罕见） | `┃ foo ┃ 2.0.0 → 1.0.0 ┃` |
+| 状态         | 颜色                  | 说明                            | 示例                                       |
+| ------------ | --------------------- | ------------------------------- | ------------------------------------------ |
+| `pinned`     | **黄色** `yellow`     | 包被 pinVersions 固定到指定版本 | `┃ lodash ┃ 4.17.20 → 4.17.21 (pinned) ┃`  |
+| `up-to-date` | **绿色** `green`      | 包已是最新版本                  | `┃ react ┃ 18.2.0 → 18.2.0 (up-to-date) ┃` |
+| `upgrade`    | **红色** `red`        | 包有可用升级                    | `┃ axios ┃ 0.27.1 → 0.27.2 ┃`              |
+| `downgrade`  | **红色** `red` (闪烁) | 包需要降级（罕见）              | `┃ foo ┃ 2.0.0 → 1.0.0 ┃`                  |
 
 **选择黄色的理由**：
+
 - 黄色在 CLI 中表示 "注意"/"警告" 级别，适合表示 "被固定" 这种需要用户注意的特殊状态
 - 与现有的 `up-to-date` (绿色)、`upgrade` (红色/白色) 区分开
 - 在暗色/亮色终端中都有良好的可读性
@@ -47,6 +48,7 @@ react        18.2.0   →  18.2.0   (up-to-date)
 ```
 
 当使用 `--format lines` 时：
+
 ```
 name@version pinned
 ```
@@ -60,6 +62,7 @@ name@version pinned
 **修改文件**：`src/lib/upgradeDependencies.ts`
 
 **当前实现**：
+
 ```typescript
 export function upgradeDependencies(
   currentDependencies: Index<VersionSpec>,
@@ -79,6 +82,7 @@ export function upgradeDependencies(
 ```
 
 **增强实现**：
+
 ```typescript
 export interface UpgradeResult {
   currentVersion: VersionSpec
@@ -152,6 +156,7 @@ export async function upgradePackageDefinitions(
 在 `Options` 接口中添加 `pinnedPackages?: Set<string>` 字段，并在调用链中传递。
 
 **修改文件**：
+
 - `src/types/Options.ts`
 - `src/lib/upgradePackageDefinitions.ts`
 - `src/lib/upgradeDependencies.ts`
@@ -235,12 +240,7 @@ export type UpgradeResults = Index<UpgradeResult>
 **修改文件**：`src/lib/logging.ts`（或 `printUpgrades.ts`）
 
 ```typescript
-function formatUpgradeLine(
-  dep: string,
-  current: string,
-  upgraded: string | undefined,
-  options: Options,
-): string {
+function formatUpgradeLine(dep: string, current: string, upgraded: string | undefined, options: Options): string {
   const color = options.color ? chalk : { ...chalk, reset: '' }
 
   if (!upgraded) {
@@ -351,15 +351,15 @@ describe('pinVersions', () => {
 
 ## 7. 优先级与依赖
 
-| 优先级 | 任务 | 依赖 |
-|--------|------|------|
-| P0 | 定义 `UpgradeResult` 类型 | - |
-| P0 | 修改 `upgradeDependencies` 返回 `UpgradeResult[]` | UpgradeResult 类型 |
-| P0 | 修改 `upgradePackageDefinitions` 传递 `pinnedPackages` | Options 扩展 |
-| P1 | 修改 `logging.ts` 添加 `(pinned)` 标记 | 返回类型变更 |
-| P1 | 修改 `format` 函数支持 pinned 标记 | logging.ts 修改 |
-| P2 | 编写单元测试 | 功能实现完成 |
-| P2 | 更新 README 文档 | 功能稳定后 |
+| 优先级 | 任务                                                   | 依赖               |
+| ------ | ------------------------------------------------------ | ------------------ |
+| P0     | 定义 `UpgradeResult` 类型                              | -                  |
+| P0     | 修改 `upgradeDependencies` 返回 `UpgradeResult[]`      | UpgradeResult 类型 |
+| P0     | 修改 `upgradePackageDefinitions` 传递 `pinnedPackages` | Options 扩展       |
+| P1     | 修改 `logging.ts` 添加 `(pinned)` 标记                 | 返回类型变更       |
+| P1     | 修改 `format` 函数支持 pinned 标记                     | logging.ts 修改    |
+| P2     | 编写单元测试                                           | 功能实现完成       |
+| P2     | 更新 README 文档                                       | 功能稳定后         |
 
 ---
 
@@ -371,6 +371,7 @@ describe('pinVersions', () => {
 - ✅ 配置文件无需修改
 
 **破坏性变更处理**：如果 `ncu` 作为库被其他项目使用，可能需要：
+
 - 添加 `options.legacyMode` 开关
 - 或在 `Options` 中定义 `upgradedDependenciesFormat` 控制输出结构
 
@@ -391,10 +392,12 @@ if (pinnedSet.has(dep)) {
 ```
 
 **优点**：
+
 - 零破坏性变更
 - 实现简单
 
 **缺点**：
+
 - `logging.ts` 需要访问 `pinVersions` 原始配置
 - 无法在 `--jsonUpgraded` 输出中体现 pinned 状态
 
@@ -407,11 +410,13 @@ if (pinnedSet.has(dep)) {
 即仅在 `logging.ts` 中读取 `options.pinVersions`，根据包名判断是否添加 `(pinned)` 标记。
 
 **理由**：
+
 1. 最小化改动，避免破坏现有 API
 2. `pinVersions` 本身是配置项，logging 模块读取它合情合理
 3. 快速实现，测试成本低
 
 **实现步骤**：
+
 1. 修改 `src/lib/logging.ts` 的 `formatUpgradeLine` 或 `print` 函数
 2. 在输出行尾添加 `(pinned)` 标记
 3. 使用 `chalk.yellow()` 高亮 `(pinned)` 文本
@@ -421,11 +426,11 @@ if (pinnedSet.has(dep)) {
 
 ## 11. 参考代码位置
 
-| 功能点 | 文件 | 行号 |
-|--------|------|------|
-| 当前版本输出 | `src/lib/logging.ts` | `formatUpgradeLine` 函数 |
-| 彩色输出 | `src/lib/chalk.ts` | `chalk` 实例 |
-| 配置读取 | `src/lib/printUpgrades.ts` | `getOptions` 函数 |
+| 功能点       | 文件                       | 行号                     |
+| ------------ | -------------------------- | ------------------------ |
+| 当前版本输出 | `src/lib/logging.ts`       | `formatUpgradeLine` 函数 |
+| 彩色输出     | `src/lib/chalk.ts`         | `chalk` 实例             |
+| 配置读取     | `src/lib/printUpgrades.ts` | `getOptions` 函数        |
 
 ---
 
