@@ -9,8 +9,7 @@ import { PackageFile } from '../types/PackageFile'
 import { Version } from '../types/Version'
 import { VersionSpec } from '../types/VersionSpec'
 import chalk from './chalk'
-import getCurrentDependencies from './getCurrentDependencies'
-import { isCatalogReference } from './getCurrentDependencies'
+import getCurrentDependencies, { filterDependencies, isCatalogReference } from './getCurrentDependencies'
 import { getIgnoredUpgradesDueToEnginesNode } from './getIgnoredUpgradesDueToEnginesNode'
 import getIgnoredUpgradesDueToPeerDeps from './getIgnoredUpgradesDueToPeerDeps'
 import getPackageManager from './getPackageManager'
@@ -198,7 +197,7 @@ export default async function runLocal(
   const isCatalogPackage = options.isCatalogFile
   const allDeps: Index<VersionSpec> =
     isCatalogPackage && (pkg as PackageFile).dependencies
-      ? (pkg as PackageFile).dependencies!
+      ? filterDependencies((pkg as PackageFile).dependencies!, options)
       : getCurrentDependencies(pkg, options)
   // For regular packages, filter out catalog:* references (they are resolved by pnpm, not from the registry).
   // For catalogs packages, keep all deps (including catalog:* refs which are the actual catalog definitions).

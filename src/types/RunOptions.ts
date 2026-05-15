@@ -1,9 +1,9 @@
 /** This file is generated automatically from the options specified in /src/cli-options.ts. Do not edit manually. Run "npm run build" or "npm run build:options" to build. */
+import { Index } from './IndexType'
 import { CooldownFunction } from './CooldownFunction'
 import { FilterFunction } from './FilterFunction'
 import { FilterResultsFunction } from './FilterResultsFunction'
 import { GroupFunction } from './GroupFunction'
-import { Index } from './IndexType'
 import { PackageFile } from './PackageFile'
 import { TargetFunction } from './TargetFunction'
 

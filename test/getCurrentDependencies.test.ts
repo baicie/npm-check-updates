@@ -1,5 +1,5 @@
 import { SemVer } from 'semver-utils'
-import getCurrentDependencies from '../src/lib/getCurrentDependencies'
+import getCurrentDependencies, { filterDependencies } from '../src/lib/getCurrentDependencies'
 import { PackageFile } from '../src/types/PackageFile'
 import chaiSetup from './helpers/chaiSetup'
 
@@ -318,6 +318,77 @@ describe('getCurrentDependencies', () => {
         chalk: '^1.1.0',
         bluebird: '^1.0.0',
       })
+    })
+  })
+})
+
+describe('filterDependencies (shared by catalogs)', () => {
+  const catalogDeps = {
+    lodash: '^4.0.0',
+    express: '^4.17.0',
+    react: '^17.0.0',
+    chalk: '^4.1.0',
+  }
+
+  it('filter catalog dependencies by package name', () => {
+    filterDependencies(catalogDeps, { filter: 'express' }).should.eql({
+      express: '^4.17.0',
+    })
+  })
+
+  it('reject catalog dependencies by package name', () => {
+    filterDependencies(catalogDeps, { reject: 'express' }).should.eql({
+      lodash: '^4.0.0',
+      react: '^17.0.0',
+      chalk: '^4.1.0',
+    })
+  })
+
+  it('filter catalog dependencies by version spec', () => {
+    filterDependencies(catalogDeps, { filterVersion: '^4.0.0' }).should.eql({
+      lodash: '^4.0.0',
+      express: '^4.17.0',
+      chalk: '^4.1.0',
+    })
+  })
+
+  it('reject catalog dependencies by version spec', () => {
+    filterDependencies(catalogDeps, { rejectVersion: '^4.0.0' }).should.eql({
+      react: '^17.0.0',
+    })
+  })
+
+  it('filter catalog dependencies by wildcard pattern', () => {
+    filterDependencies(catalogDeps, { filter: 'l*' }).should.eql({
+      lodash: '^4.0.0',
+    })
+  })
+
+  it('reject catalog dependencies by wildcard pattern', () => {
+    filterDependencies(catalogDeps, { reject: 'r*' }).should.eql({
+      express: '^4.17.0',
+      chalk: '^4.1.0',
+    })
+  })
+
+  it('combine filter and reject for catalog dependencies', () => {
+    filterDependencies(catalogDeps, { filter: 'lodash express react', reject: 'react' }).should.eql({
+      lodash: '^4.0.0',
+      express: '^4.17.0',
+    })
+  })
+
+  it('filter catalog dependencies by function', () => {
+    filterDependencies(catalogDeps, { filter: (s: string) => s.startsWith('r') }).should.eql({
+      react: '^17.0.0',
+    })
+  })
+
+  it('reject catalog dependencies by function', () => {
+    filterDependencies(catalogDeps, { reject: (s: string) => s.startsWith('r') }).should.eql({
+      lodash: '^4.0.0',
+      express: '^4.17.0',
+      chalk: '^4.1.0',
     })
   })
 })

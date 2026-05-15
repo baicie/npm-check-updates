@@ -813,9 +813,163 @@ catalog:
         }
       })
     })
+
+    describe('catalog filter/reject', () => {
+      it('reject catalog dependencies by package name', async () => {
+        const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'npm-check-updates-'))
+        try {
+          const pkgDataRoot = JSON.stringify({
+            dependencies: {
+              'ncu-test-v2': '1.0.0',
+            },
+          })
+
+          const pnpmWorkspaceData = `packages:
+  - 'packages/**'
+
+catalog:
+  ncu-test-v2: '1.0.0'
+  ncu-test-tag: '1.0.0'
+`
+
+          await fs.writeFile(path.join(tempDir, 'package.json'), pkgDataRoot, 'utf-8')
+          await fs.writeFile(path.join(tempDir, 'pnpm-workspace.yaml'), pnpmWorkspaceData, 'utf-8')
+          await fs.writeFile(path.join(tempDir, 'pnpm-lock.yaml'), '', 'utf-8')
+
+          await fs.mkdir(path.join(tempDir, 'packages/a'), { recursive: true })
+          await fs.writeFile(
+            path.join(tempDir, 'packages/a/package.json'),
+            JSON.stringify({
+              dependencies: {
+                'ncu-test-tag': 'catalog:',
+              },
+            }),
+            'utf-8',
+          )
+
+          const { stdout, stderr } = await spawn(
+            'node',
+            [bin, '--jsonAll', '--workspaces', '--reject', 'ncu-test-v2'],
+            { rejectOnError: false },
+            { cwd: tempDir },
+          )
+
+          stderr.should.be.empty
+          stdout.should.not.be.empty
+
+          const output = JSON.parse(stdout)
+
+          output['pnpm-workspace.yaml'].catalog?.should.not.have.property('ncu-test-v2')
+          output['pnpm-workspace.yaml'].catalog?.should.have.property('ncu-test-tag', '1.1.0')
+        } finally {
+          await fs.rm(tempDir, { recursive: true, force: true })
+        }
+      })
+
+      it('filter catalog dependencies by package name', async () => {
+        const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'npm-check-updates-'))
+        try {
+          const pkgDataRoot = JSON.stringify({
+            dependencies: {
+              'ncu-test-v2': '1.0.0',
+            },
+          })
+
+          const pnpmWorkspaceData = `packages:
+  - 'packages/**'
+
+catalog:
+  ncu-test-v2: '1.0.0'
+  ncu-test-tag: '1.0.0'
+`
+
+          await fs.writeFile(path.join(tempDir, 'package.json'), pkgDataRoot, 'utf-8')
+          await fs.writeFile(path.join(tempDir, 'pnpm-workspace.yaml'), pnpmWorkspaceData, 'utf-8')
+          await fs.writeFile(path.join(tempDir, 'pnpm-lock.yaml'), '', 'utf-8')
+
+          await fs.mkdir(path.join(tempDir, 'packages/a'), { recursive: true })
+          await fs.writeFile(
+            path.join(tempDir, 'packages/a/package.json'),
+            JSON.stringify({
+              dependencies: {
+                'ncu-test-tag': 'catalog:',
+              },
+            }),
+            'utf-8',
+          )
+
+          const { stdout, stderr } = await spawn(
+            'node',
+            [bin, '--jsonAll', '--workspaces', '--filter', 'ncu-test-tag'],
+            { rejectOnError: false },
+            { cwd: tempDir },
+          )
+
+          stderr.should.be.empty
+          stdout.should.not.be.empty
+
+          const output = JSON.parse(stdout)
+
+          output['pnpm-workspace.yaml'].catalog?.should.not.have.property('ncu-test-v2')
+          output['pnpm-workspace.yaml'].catalog?.should.have.property('ncu-test-tag', '1.1.0')
+        } finally {
+          await fs.rm(tempDir, { recursive: true, force: true })
+        }
+      })
+
+      it('rejectVersion filters catalog dependencies by current version', async () => {
+        const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'npm-check-updates-'))
+        try {
+          const pkgDataRoot = JSON.stringify({
+            dependencies: {
+              'ncu-test-v2': '1.0.0',
+            },
+          })
+
+          const pnpmWorkspaceData = `packages:
+  - 'packages/**'
+
+catalog:
+  ncu-test-v2: '1.0.0'
+  ncu-test-tag: '1.0.0'
+`
+
+          await fs.writeFile(path.join(tempDir, 'package.json'), pkgDataRoot, 'utf-8')
+          await fs.writeFile(path.join(tempDir, 'pnpm-workspace.yaml'), pnpmWorkspaceData, 'utf-8')
+          await fs.writeFile(path.join(tempDir, 'pnpm-lock.yaml'), '', 'utf-8')
+
+          await fs.mkdir(path.join(tempDir, 'packages/a'), { recursive: true })
+          await fs.writeFile(
+            path.join(tempDir, 'packages/a/package.json'),
+            JSON.stringify({
+              dependencies: {
+                'ncu-test-tag': 'catalog:',
+              },
+            }),
+            'utf-8',
+          )
+
+          const { stdout, stderr } = await spawn(
+            'node',
+            [bin, '--jsonAll', '--workspaces', '--rejectVersion', '1.0.0'],
+            { rejectOnError: false },
+            { cwd: tempDir },
+          )
+
+          stderr.should.be.empty
+          stdout.should.not.be.empty
+
+          const output = JSON.parse(stdout)
+
+          output['pnpm-workspace.yaml'].catalog?.should.not.have.property('ncu-test-v2')
+          output['pnpm-workspace.yaml'].catalog?.should.not.have.property('ncu-test-tag')
+        } finally {
+          await fs.rm(tempDir, { recursive: true, force: true })
+        }
+      })
+    })
   })
 
-  // cannot be stubbed because npm config printing occurs in viewMany
   describe('not stubbed', () => {
     // This test fails on Node v20.3.1 on GitHub Actions (only).
     // The stdout fails to match the expected value: "npm config (workspace project):\n{ncutest: 'root' }"

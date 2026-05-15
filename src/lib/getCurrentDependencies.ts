@@ -26,6 +26,36 @@ const parsePackageManager = (pkgData: PackageFile) => {
   const [name, version] = pkgData.packageManager.split('@')
   return { [name]: version }
 }
+
+/**
+ * Applies filter, reject, filterVersion, and rejectVersion to a dependencies object.
+ * This logic is shared between regular packages and catalog packages.
+ *
+ * @param dependencies - The dependencies to filter
+ * @param options - Options containing filter/reject/filterVersion/rejectVersion
+ * @returns Filtered dependencies
+ */
+export function filterDependencies(
+  dependencies: Index<VersionSpec>,
+  options: Options,
+): Index<VersionSpec> {
+  const workspacePackageMap = keyValueBy(options.workspacePackages || [])
+  try {
+    return filterObject(
+      filterObject(dependencies, name => !workspacePackageMap[name]),
+      filterAndReject(
+        options.filter || null,
+        options.reject || null,
+        options.filterVersion || null,
+        options.rejectVersion || null,
+      ),
+    )
+  } catch (err: any) {
+    programError(options, 'Invalid filter: ' + err.message || err)
+    return {}
+  }
+}
+
 /**
  * Get the current dependencies from the package file.
  *
@@ -53,24 +83,8 @@ function getCurrentDependencies(pkgData: PackageFile = {}, options: Options = {}
     }
   }, {} as Index<VersionSpec>)
 
-  // filter & reject dependencies and versions
-  const workspacePackageMap = keyValueBy(options.workspacePackages || [])
-  let filteredDependencies: Index<VersionSpec> = {}
-  try {
-    filteredDependencies = filterObject(
-      filterObject(allDependencies, name => !workspacePackageMap[name]),
-      filterAndReject(
-        options.filter || null,
-        options.reject || null,
-        options.filterVersion || null,
-        options.rejectVersion || null,
-      ),
-    )
-  } catch (err: any) {
-    programError(options, 'Invalid filter: ' + err.message || err)
-  }
-
-  return filteredDependencies
+  // apply filter & reject
+  return filterDependencies(allDependencies, options)
 }
 
 export default getCurrentDependencies
