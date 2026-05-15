@@ -1,6 +1,6 @@
 {
   "name": "@baicie/ncu",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": "Tomas Junnonen <tomas1@gmail.com>",
   "license": "Apache-2.0",
   "type": "module",
@@ -201,5 +201,14 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "ignoredBuiltDependencies": [
+      "simple-git-hooks",
+      "yarn"
+    ]
   }
 }
