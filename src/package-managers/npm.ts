@@ -43,86 +43,85 @@ const isExplicitRange = (spec: VersionSpec) => {
 const isExactVersion = (version: Version) =>
   version && (!nodeSemver.validRange(version) || versionUtil.isWildCard(version))
 
-/** Fetches a packument or dist-tag from the npm registry. */
-const fetchPartialPackument = async (
-  name: string,
-  fields: (keyof Packument)[],
-  tag: string | null,
-  opts: npmRegistryFetch.FetchOptions = {},
-  version?: Version,
-): Promise<Partial<Packument>> => {
-  const corgiDoc = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*'
-  const fullDoc = 'application/json'
+/** Memoize fetchPartialPackument within a single process run to avoid duplicate HTTP requests.
+ * Key is based on name, fields, tag, and the subset of opts that affect HTTP response.
+ * Deduplicates calls from packageAuthorChanged, getEngines, and fetchUpgradedPackumentMemo. */
+const fetchPartialPackumentMemo = memoize(
+  async (
+    name: string,
+    fields: (keyof Packument)[],
+    tag: string | null,
+    opts: npmRegistryFetch.FetchOptions = {},
+    version?: Version,
+  ): Promise<Partial<Packument>> => {
+    const corgiDoc = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*'
+    const fullDoc = 'application/json'
 
-  const registry = npmRegistryFetch.pickRegistry(name, opts)
-  const headers = {
-    'user-agent': opts.userAgent || `npm-check-updates/${pkg.version} node/${process.version}`,
-    'ncu-version': pkg.version,
-    'ncu-pkg-id': `registry:${name}`,
-    accept: opts.fullMetadata ? fullDoc : corgiDoc,
-    ...opts.headers,
-  }
-  const url = new URL(
-    // since the registry API expects /package or /package/version encoding
-    // scoped packages is needed as to not treat the package scope as the full
-    // package name and the actual package name as the version/dist-tag
-    encodeURIComponent(name),
-    // the WhatWG URL standard, when given a base URL to place the first
-    // parameter relative to, will find the dirname of the base, treating the
-    // last segment as a file name and not a directory name if it isn't
-    // terminated by a / and thus remove it before adding the first argument
-    // to the URL.
-    // this is undesirable for registries configured without a trailing slash
-    // in the npm config since, for example looking up the package @foo/bar
-    // will give the following results given these configured registry URL:s
-    //    https://example.com/npm  => https://example.com/%40foo%2fbar
-    //    https://example.com/npm/ => https://example.com/npm/%40foo%2fbar
-    // however, like npm itself does there should be leniency allowed in this.
-    registry.endsWith('/') ? registry : `${registry}/`,
-  )
-  if (version) {
-    url.pathname += `/${version}`
-  }
-  const fetchOptions = {
-    ...opts,
-    headers,
-    spec: name,
-  }
+    const registry = npmRegistryFetch.pickRegistry(name, opts)
+    const headers = {
+      'user-agent': opts.userAgent || `npm-check-updates/${pkg.version} node/${process.version}`,
+      'ncu-version': pkg.version,
+      'ncu-pkg-id': `registry:${name}`,
+      accept: opts.fullMetadata ? fullDoc : corgiDoc,
+      ...opts.headers,
+    }
+    const url = new URL(encodeURIComponent(name), registry.endsWith('/') ? registry : `${registry}/`)
+    if (version) {
+      url.pathname += `/${version}`
+    }
+    const fetchOptions = {
+      ...opts,
+      headers,
+      spec: name,
+    }
 
-  try {
-    if (opts.fullMetadata) {
-      return npmRegistryFetch.json(url.href, fetchOptions)
-    } else {
-      tag = tag || 'latest'
-      // typescript does not type async iterable stream correctly so we need to cast it
-      const stream = npmRegistryFetch.json.stream(url.href, '$*', fetchOptions) as unknown as IterableIterator<{
-        key: keyof Packument
-        value: Packument[keyof Packument]
-      }>
+    try {
+      if (opts.fullMetadata) {
+        return npmRegistryFetch.json(url.href, fetchOptions)
+      } else {
+        tag = tag || 'latest'
+        const stream = npmRegistryFetch.json.stream(url.href, '$*', fetchOptions) as unknown as IterableIterator<{
+          key: keyof Packument
+          value: Packument[keyof Packument]
+        }>
 
-      const partialPackument: Partial<Packument> = { name }
+        const partialPackument: Partial<Packument> = { name }
 
-      for await (const { key, value } of stream) {
-        if (fields.includes(key)) {
-          // TODO: Fix type
-          partialPackument[key] = value as any
-          if (Object.keys(partialPackument).length === fields.length + 1) {
-            break
+        for await (const { key, value } of stream) {
+          if (fields.includes(key)) {
+            partialPackument[key] = value as any
+            if (Object.keys(partialPackument).length === fields.length + 1) {
+              break
+            }
           }
         }
+
+        return partialPackument
+      }
+    } catch (err: any) {
+      if (err.code !== 'E404' || opts.fullMetadata) {
+        throw err
       }
 
-      return partialPackument
+      // possible that corgis are not supported by this registry
+      return fetchPartialPackumentMemo(name, fields, tag, { ...opts, fullMetadata: true }, version)
     }
-  } catch (err: any) {
-    if (err.code !== 'E404' || opts.fullMetadata) {
-      throw err
-    }
+  },
+  {
+    serializer: (args: unknown[]) =>
+      JSON.stringify({
+        name: args[0] as string,
+        fields: args[1] as (keyof Packument)[],
+        tag: args[2] as string | null,
+        registry: ((args[3] as { registry?: string; fullMetadata?: boolean }) || {}).registry,
+        fullMetadata: ((args[3] as { registry?: string; fullMetadata?: boolean }) || {}).fullMetadata,
+        version: args[4] as string | undefined,
+      }),
+  },
+)
 
-    // possible that corgis are not supported by this registry
-    return fetchPartialPackument(name, fields, tag, { ...opts, fullMetadata: true }, version)
-  }
-}
+/** Fetches a packument or dist-tag from the npm registry. */
+const fetchPartialPackument = fetchPartialPackumentMemo
 
 /**
  * Decorates a tag-specific/version-specific packument object with the package name and `time` property from the full packument,
@@ -304,7 +303,11 @@ const findNpmConfig = memoize((configPath?: string): NpmConfig | null => {
     })
     config = {
       ...opts.toJSON(),
-      cache: false,
+      // Do NOT disable HTTP caching — npm-registry-fetch uses cacache (~/.npm/_cacache).
+      // preferOnline: true means always send the request but use the cached response if
+      // the server responds with 304 (Not Modified) based on ETag/Last-Modified.
+      // This ensures we never miss new versions while avoiding re-downloading unchanged packuments.
+      preferOnline: true,
     }
   }
 
